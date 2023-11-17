@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String?   @unique
+  username       String    @unique
+  hashedPassword String
+  role           Role      @default(USER)
+  roleId         String
+  Invoice        Invoice[]
+}
+
+model Customer {
+  id      String    @id @default(uuid())
+  name    String
+  phone   String?
+  address String?
+  Invoice Invoice[]
+}
+
+enum Role {
+  ADMIN
+  STOCK
+  CASHIER
+  USER
+}
+
+model Stock {
+  id         String      @id @default(uuid())
+  name       String
+  stockItems StockItem[]
+}
+
+model StockItem {
+  id            String       @id @default(uuid())
+  expiresDate   DateTime
+  quantity      Int
+  price         Decimal
+  stock         Stock        @relation(fields: [stockId], references: [id])
+  stockId       String
+  StockReport   StockReport? @relation(fields: [stockReportId], references: [id])
+  stockReportId String?
+}
+
+model StockReport {
+  id         String      @id @default(uuid())
+  createdAt  DateTime    @default(now())
+  stockItems StockItem[]
+}
+
+model Menu {
+  id          String        @id @default(uuid())
+  name        String
+  price       Decimal
+  picture     String
+  isActive    Boolean       @default(true)
+  InvoiceItem InvoiceItem[]
+}
+
+model Invoice {
+  id         String        @id @default(uuid())
+  createdAt  DateTime      @default(now())
+  customer   Customer?     @relation(fields: [customerId], references: [id])
+  customerId String?
+  user       User          @relation(fields: [userId], references: [id])
+  userId     String
+  items      InvoiceItem[]
+}
+
+model InvoiceItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  cupSize   CupSize
+  sugar     Float
+  attribute String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  menuId    String
+  Invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId String?
+}
+
+enum CupSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
