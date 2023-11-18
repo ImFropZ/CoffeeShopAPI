@@ -13,16 +13,16 @@ model User {
   username       String    @unique
   hashedPassword String
   role           Role      @default(USER)
-  roleId         String
-  Invoice        Invoice[]
+  roleId         Role      @default(USER)
+  invoices       Invoice[]
 }
 
 model Customer {
-  id      String    @id @default(uuid())
-  name    String
-  phone   String?
-  address String?
-  Invoice Invoice[]
+  id       String    @id @default(uuid())
+  name     String
+  phone    String?
+  address  String?
+  invoices Invoice[]
 }
 
 enum Role {
@@ -33,26 +33,37 @@ enum Role {
 }
 
 model Stock {
-  id         String      @id @default(uuid())
-  name       String
-  stockItems StockItem[]
+  id              String            @id @default(uuid())
+  name            String
+  stockItems      StockItem[]
+  stockReportItem StockReportItem[]
 }
 
 model StockItem {
-  id            String       @id @default(uuid())
-  expiresDate   DateTime
-  quantity      Int
-  price         Decimal
-  stock         Stock        @relation(fields: [stockId], references: [id])
-  stockId       String
-  StockReport   StockReport? @relation(fields: [stockReportId], references: [id])
-  stockReportId String?
+  id              String            @id @default(uuid())
+  expiresDate     DateTime
+  quantity        Int
+  price           Decimal
+  stock           Stock             @relation(fields: [stockId], references: [id])
+  stockId         String
+  stockReportItem StockReportItem[]
 }
 
 model StockReport {
-  id         String      @id @default(uuid())
-  createdAt  DateTime    @default(now())
-  stockItems StockItem[]
+  id              String            @id @default(uuid())
+  createdAt       DateTime          @default(now())
+  stockReportItem StockReportItem[]
+}
+
+model StockReportItem {
+  id            String      @id @default(uuid())
+  quantity      Int
+  stock         Stock       @relation(fields: [stockId], references: [id])
+  stockId       String
+  stockItem     StockItem   @relation(fields: [stockItemId], references: [id])
+  stockItemId   String
+  stockReport   StockReport @relation(fields: [stockReportId], references: [id])
+  stockReportId String
 }
 
 model Menu {
@@ -61,7 +72,7 @@ model Menu {
   price       Decimal
   picture     String
   isActive    Boolean       @default(true)
-  InvoiceItem InvoiceItem[]
+  invoiceItem InvoiceItem[]
 }
 
 model Invoice {
@@ -82,7 +93,7 @@ model InvoiceItem {
   attribute String
   menu      Menu     @relation(fields: [menuId], references: [id])
   menuId    String
-  Invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
   invoiceId String?
 }
 
