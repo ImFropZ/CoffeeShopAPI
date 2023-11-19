@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 export function generateAccessToken(username: string) {
   return jwt.sign({ username }, process.env.ACCESS_TOKEN_SECRET ?? "", {
@@ -29,4 +30,8 @@ export function getcookie(req: Request) {
   var cookie = req.headers.cookie;
   if (!cookie) return [];
   return cookie.split("; ");
+}
+
+export function generateToken(length = 3) {
+  return crypto.randomBytes(length).toString("hex");
 }

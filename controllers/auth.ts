@@ -1,6 +1,11 @@
 import { Response, Request } from "express";
 import authService from "../services/auth";
-import { loginSchema, registerSchema } from "../schema";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  verifyTokenSchema,
+} from "../schema";
 import { BadRequestError } from "../models/error";
 import { getcookie } from "../utils";
 
@@ -17,7 +22,7 @@ export async function login(req: Request, res: Response) {
   });
 
   res.json({
-    message: "Lgoged in",
+    message: "Successfully logged",
   });
 }
 
@@ -54,4 +59,36 @@ export async function logout(req: Request, res: Response) {
 
   res.clearCookie("access-token");
   res.json({ message: "Logged out" });
+}
+
+export async function forgotPassword(req: Request, res: Response) {
+  const forgotPasswordCredentials = await forgotPasswordSchema
+    .parseAsync(req.body)
+    .catch((_) => {
+      throw new BadRequestError("Invalid forgot password credentials");
+    });
+
+  const isSend = await authService.forgotPassword(forgotPasswordCredentials);
+
+  if (!isSend) {
+    throw new BadRequestError("Unable to send email");
+  }
+
+  res.json({ message: "The token has been to your email." });
+}
+
+export async function verifyToken(req: Request, res: Response) {
+  const verifyTokenCredentials = await verifyTokenSchema
+    .parseAsync(req.body)
+    .catch((_) => {
+      throw new BadRequestError("Invalid verify token credentials");
+    });
+
+  const isVerified = await authService.verifyToken(verifyTokenCredentials);
+
+  if (!isVerified) {
+    throw new BadRequestError("Invalid token");
+  }
+
+  res.json({ message: "Token is valid" });
 }

@@ -4,6 +4,8 @@ import cors from "cors";
 import api from "./api";
 import { ResponseError } from "./models/error";
 
+require("dotenv").config();
+
 const app = express();
 const port = 3000;
 
