@@ -34,3 +34,10 @@ export class ForbiddenError extends ResponseError {
     this.name = "ForbiddenError";
   }
 }
+
+export class InternalError extends ResponseError {
+  constructor(message: string) {
+    super(message, 500);
+    this.name = "InternalError";
+  }
+}

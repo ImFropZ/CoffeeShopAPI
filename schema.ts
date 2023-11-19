@@ -12,7 +12,10 @@ export const registerSchema = z.object({
 });
 
 export const forgotPasswordSchema = z.object({
-  username: z.string().regex(/^[a-zA-Z0-9_]+$/),
+  data: z
+    .string()
+    .email()
+    .or(z.string().regex(/^[a-zA-Z0-9_]+$/)),
 });
 
 export const verifyTokenSchema = z.object({

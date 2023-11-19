@@ -90,5 +90,5 @@ export async function verifyToken(req: Request, res: Response) {
     throw new BadRequestError("Invalid token");
   }
 
-  res.json({ message: "Token is valid" });
+  res.json({ message: "Your password has been updated." });
 }

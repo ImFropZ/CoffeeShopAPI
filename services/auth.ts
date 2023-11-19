@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
-import { BadRequestError, UnauthorizedError } from "../models/error";
+import {
+  BadRequestError,
+  InternalError,
+  UnauthorizedError,
+} from "../models/error";
 import {
   registerSchema,
   loginSchema,
@@ -21,8 +25,8 @@ class AuthService {
           username,
         },
       })
-      .catch((err) => {
-        throw new Error(err);
+      .catch((_) => {
+        throw new InternalError("Something went wrong");
       });
 
     if (!user) {
@@ -52,7 +56,7 @@ class AuthService {
         },
       })
       .catch((_) => {
-        throw new BadRequestError("User is already created");
+        throw new InternalError("Something went wrong");
       });
 
     if (!user) {
@@ -66,16 +70,33 @@ class AuthService {
     };
   }
 
-  async forgotPassword({ username }: z.infer<typeof forgotPasswordSchema>) {
-    const user = await this.prisma.user
-      .findUnique({
-        where: {
-          username,
-        },
-      })
-      .catch((err) => {
-        throw new BadRequestError("User is not found");
-      });
+  async forgotPassword({ data }: z.infer<typeof forgotPasswordSchema>) {
+    // Check if data is email or username
+    const username = data.includes("@") ? undefined : data;
+
+    let user = null;
+
+    if (username === undefined) {
+      user = await this.prisma.user
+        .findUnique({
+          where: {
+            email: data,
+          },
+        })
+        .catch((_) => {
+          throw new InternalError("Something went wrong");
+        });
+    } else {
+      user = await this.prisma.user
+        .findUnique({
+          where: {
+            username,
+          },
+        })
+        .catch((_) => {
+          throw new InternalError("Something went wrong");
+        });
+    }
 
     if (!user) {
       throw new BadRequestError("User is not found");
