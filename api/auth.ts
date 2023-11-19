@@ -1,17 +1,10 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
+import { login, logout, register } from "../controllers/auth";
 import { use } from "../utils";
 const api = Router();
 
-api.get(
-  "/login",
-  use((req: Request, res: Response) => {
-    throw new Error("Error");
-    res.send("Login");
-  })
-);
-
-api.get("/logout", (req: Request, res: Response) => {
-  res.status(200).send("Logout");
-});
+api.post("/login", use(login));
+api.post("/register", use(register));
+api.post("/logout", use(logout));
 
 export default api;
