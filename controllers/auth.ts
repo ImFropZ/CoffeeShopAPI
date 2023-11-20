@@ -1,4 +1,4 @@
-import { userSchema } from "./../schema";
+import { updateUserSchema, userLocalsSchema } from "./../schema";
 import { Response, Request } from "express";
 import authService from "../services/auth";
 import {
@@ -9,6 +9,7 @@ import {
 } from "../schema";
 import { BadRequestError } from "../models/error";
 import { getCookie } from "../utils";
+import { User } from "@prisma/client";
 
 export async function login(req: Request, res: Response) {
   const loginCredentials = await loginSchema.parseAsync(req.body).catch((_) => {
@@ -95,13 +96,25 @@ export async function verifyToken(req: Request, res: Response) {
 }
 
 export async function profile(req: Request, res: Response) {
-  const { username } = await userSchema
-    .parseAsync(res.locals.user)
-    .catch((_) => {
-      throw new BadRequestError("Invalid user");
-    });
+  const user = await userLocalsSchema.parseAsync(res.locals.user).catch((_) => {
+    throw new BadRequestError("Invalid user");
+  });
 
-  const user = await authService.profile({ username });
+  const userDetails = await authService.profile(user);
 
-  res.json(user);
+  res.json(userDetails);
+}
+
+export async function updateProfile(req: Request, res: Response) {
+  const user = await userLocalsSchema.parseAsync(res.locals.user).catch((_) => {
+    throw new BadRequestError("Invalid user");
+  });
+
+  const userUpdate = await updateUserSchema.parseAsync(req.body).catch((_) => {
+    throw new BadRequestError("Invalid user update");
+  });
+
+  const userDetails = await authService.updateProfile(user, userUpdate);
+
+  res.json(userDetails);
 }

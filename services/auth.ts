@@ -1,8 +1,12 @@
-import { userSchema } from "./../schema";
+import { updateUserSchema, userLocalsSchema } from "./../schema";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
-import { BadRequestError, InternalError } from "../models/error";
+import {
+  BadRequestError,
+  ForbiddenError,
+  InternalError,
+} from "../models/error";
 import {
   registerSchema,
   loginSchema,
@@ -236,11 +240,14 @@ class AuthService {
     return true;
   }
 
-  async profile({ username }: z.infer<typeof userSchema>) {
+  async profile({ username }: z.infer<typeof userLocalsSchema>) {
     const user = await this.prisma.user
       .findUnique({
         where: {
           username,
+        },
+        include: {
+          invoices: true,
         },
       })
       .catch((_) => {
@@ -254,6 +261,100 @@ class AuthService {
     return {
       username: user.username,
       email: user.email,
+      role: user.role,
+      invoices: user.invoices,
+    };
+  }
+
+  async updateProfile(
+    user: z.infer<typeof userLocalsSchema>,
+    userToUpdate: z.infer<typeof updateUserSchema>
+  ) {
+    const isUpdateOwnProfile = user.username === userToUpdate.username;
+
+    if (!isUpdateOwnProfile && user.role !== "ADMIN") {
+      throw new ForbiddenError("You are not allowed to update this user");
+    }
+
+    // Update the password if oldPassword and newPassword is provided
+    if (userToUpdate.oldPassword && userToUpdate.newPassword) {
+      const { hashedPassword } = await this.prisma.user
+        .findFirstOrThrow({
+          where: { username: user.username },
+          select: { hashedPassword: true },
+        })
+        .catch((_) => {
+          throw new BadRequestError("User is not found");
+        });
+
+      const isCorrectPassword = bcrypt.compareSync(
+        userToUpdate.oldPassword,
+        hashedPassword
+      );
+
+      if (!isCorrectPassword) {
+        throw new BadRequestError("Old password is incorrect");
+      }
+
+      await this.prisma.user.update({
+        where: {
+          username: userToUpdate.username,
+        },
+        data: {
+          hashedPassword: await bcrypt.hash(userToUpdate.newPassword, 10),
+        },
+      });
+    } else if (user.role === "ADMIN" && userToUpdate.newPassword) {
+      await this.prisma.user.update({
+        where: {
+          username: userToUpdate.username,
+        },
+        data: {
+          hashedPassword: await bcrypt.hash(userToUpdate.newPassword, 10),
+        },
+      });
+    }
+
+    if (!isUpdateOwnProfile) {
+      const updatedUser = await this.prisma.user
+        .update({
+          where: {
+            username: userToUpdate.username,
+          },
+          data: {
+            username: userToUpdate.username,
+            email: userToUpdate.email,
+            role: userToUpdate.role,
+          },
+        })
+        .catch((_) => {
+          throw new InternalError("Something went wrong");
+        });
+
+      if (!updatedUser) {
+        throw new BadRequestError("User is not updated");
+      }
+
+      return {
+        username: updatedUser.username,
+        email: updatedUser.email,
+        role: updatedUser.role,
+      };
+    }
+
+    const updatedUser = await this.prisma.user.update({
+      where: {
+        username: userToUpdate.username,
+      },
+      data: {
+        username: userToUpdate.username,
+        email: userToUpdate.email,
+      },
+    });
+
+    return {
+      username: updatedUser.username,
+      email: updatedUser.email,
       role: user.role,
     };
   }

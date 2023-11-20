@@ -1,8 +1,9 @@
 import { Response, NextFunction, Request } from "express";
 import { getCookie, verifyAccessToken } from "../utils";
 import { UnauthorizedError } from "../models/error";
+import { prisma } from "../config/prisma";
 
-export function authorizeMiddleware(
+export async function authorizeMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
@@ -13,19 +14,31 @@ export function authorizeMiddleware(
     throw new UnauthorizedError("You are not logged in");
   }
 
-  let user = null;
+  let token = null;
 
   cookies.forEach((cookie) => {
     const [key, value] = cookie.split("=");
     if (key === "access-token") {
-      user = verifyAccessToken(value);
+      token = value;
     }
   });
 
-  if (!user) {
+  const { username } = verifyAccessToken(token ?? "") ?? { username: "" };
+
+  if (!username) {
     throw new UnauthorizedError("You are not logged in");
   }
 
-  res.locals.user = user;
+  const user = await prisma.user.findFirstOrThrow({
+    where: {
+      username,
+    },
+  });
+
+  res.locals.user = {
+    username: user.username,
+    email: user.email,
+    role: user.role,
+  };
   next();
 }

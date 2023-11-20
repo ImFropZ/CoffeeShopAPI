@@ -30,6 +30,16 @@ export const verifyTokenSchema = z.object({
   token: z.string().length(6),
 });
 
-export const userSchema = z.object({
+export const userLocalsSchema = z.object({
   username: z.string().regex(/^[a-zA-Z0-9_]+$/),
+  email: z.string().email().nullable(),
+  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]),
+});
+
+export const updateUserSchema = z.object({
+  username: z.string().regex(/^[a-zA-Z0-9_]+$/),
+  email: z.string().email().nullable(),
+  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]).default("USER"),
+  oldPassword: z.string().min(6).max(100).optional(),
+  newPassword: z.string().min(6).max(100).optional(),
 });
