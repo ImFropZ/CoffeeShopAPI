@@ -71,9 +71,12 @@ model Menu {
   id          String        @id @default(uuid())
   name        String
   price       Decimal
+  cupSize     CupSize
   picture     String
   isActive    Boolean       @default(true)
   invoiceItem InvoiceItem[]
+
+  @@unique([name, cupSize])
 }
 
 model Invoice {

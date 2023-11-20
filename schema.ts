@@ -43,3 +43,18 @@ export const updateUserSchema = z.object({
   oldPassword: z.string().min(6).max(100).optional(),
   newPassword: z.string().min(6).max(100).optional(),
 });
+
+export const createMenuSchema = z.object({
+  name: z.string().min(3).max(100),
+  picture: z.string().url(),
+  price: z.number().min(0),
+  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+});
+
+export const updateMenuSchema = z.object({
+  id: z.string(),
+  name: z.string().min(3).max(100),
+  picture: z.string().url(),
+  price: z.number().min(0),
+  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+});
