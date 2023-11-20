@@ -8,7 +8,7 @@ import {
   verifyTokenSchema,
 } from "../schema";
 import { BadRequestError } from "../models/error";
-import { getCookie } from "../utils";
+import { generateAccessToken, getCookie } from "../utils";
 import { User } from "@prisma/client";
 
 export async function login(req: Request, res: Response) {
@@ -115,6 +115,11 @@ export async function updateProfile(req: Request, res: Response) {
   });
 
   const userDetails = await authService.updateProfile(user, userUpdate);
+
+  res.cookie("access-token", generateAccessToken(userDetails.username), {
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    httpOnly: true,
+  });
 
   res.json(userDetails);
 }

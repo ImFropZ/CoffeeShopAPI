@@ -270,12 +270,6 @@ class AuthService {
     user: z.infer<typeof userLocalsSchema>,
     userToUpdate: z.infer<typeof updateUserSchema>
   ) {
-    const isUpdateOwnProfile = user.username === userToUpdate.username;
-
-    if (!isUpdateOwnProfile && user.role !== "ADMIN") {
-      throw new ForbiddenError("You are not allowed to update this user");
-    }
-
     // Update the password if oldPassword and newPassword is provided
     if (userToUpdate.oldPassword && userToUpdate.newPassword) {
       const { hashedPassword } = await this.prisma.user
@@ -304,22 +298,13 @@ class AuthService {
           hashedPassword: await bcrypt.hash(userToUpdate.newPassword, 10),
         },
       });
-    } else if (user.role === "ADMIN" && userToUpdate.newPassword) {
-      await this.prisma.user.update({
-        where: {
-          username: userToUpdate.username,
-        },
-        data: {
-          hashedPassword: await bcrypt.hash(userToUpdate.newPassword, 10),
-        },
-      });
     }
 
-    if (!isUpdateOwnProfile) {
+    if (user.role === "ADMIN") {
       const updatedUser = await this.prisma.user
         .update({
           where: {
-            username: userToUpdate.username,
+            username: user.username,
           },
           data: {
             username: userToUpdate.username,
@@ -344,7 +329,7 @@ class AuthService {
 
     const updatedUser = await this.prisma.user.update({
       where: {
-        username: userToUpdate.username,
+        username: user.username,
       },
       data: {
         username: userToUpdate.username,
