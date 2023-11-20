@@ -9,7 +9,6 @@ import {
 } from "../schema";
 import { BadRequestError } from "../models/error";
 import { generateAccessToken, getCookie } from "../utils";
-import { User } from "@prisma/client";
 
 export async function login(req: Request, res: Response) {
   const loginCredentials = await loginSchema.parseAsync(req.body).catch((_) => {
