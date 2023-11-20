@@ -26,7 +26,7 @@ export const use =
   (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);
 
-export function getcookie(req: Request) {
+export function getCookie(req: Request) {
   var cookie = req.headers.cookie;
   if (!cookie) return [];
   return cookie.split("; ");

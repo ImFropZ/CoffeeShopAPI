@@ -1,3 +1,4 @@
+import { userSchema } from "./../schema";
 import { Response, Request } from "express";
 import authService from "../services/auth";
 import {
@@ -7,7 +8,7 @@ import {
   verifyTokenSchema,
 } from "../schema";
 import { BadRequestError } from "../models/error";
-import { getcookie } from "../utils";
+import { getCookie } from "../utils";
 
 export async function login(req: Request, res: Response) {
   const loginCredentials = await loginSchema.parseAsync(req.body).catch((_) => {
@@ -40,7 +41,7 @@ export async function register(req: Request, res: Response) {
 
 export async function logout(req: Request, res: Response) {
   let isLogin = false;
-  const cookies = getcookie(req);
+  const cookies = getCookie(req);
 
   if (cookies.length === 0) {
     throw new BadRequestError("You are not logged in");
@@ -91,4 +92,16 @@ export async function verifyToken(req: Request, res: Response) {
   }
 
   res.json({ message: "Your password has been updated." });
+}
+
+export async function profile(req: Request, res: Response) {
+  const { username } = await userSchema
+    .parseAsync(res.locals.user)
+    .catch((_) => {
+      throw new BadRequestError("Invalid user");
+    });
+
+  const user = await authService.profile({ username });
+
+  res.json(user);
 }

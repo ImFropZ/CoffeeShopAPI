@@ -26,3 +26,7 @@ export const verifyTokenSchema = z.object({
   newPassword: z.string().min(6).max(100),
   token: z.string().length(6),
 });
+
+export const userSchema = z.object({
+  username: z.string().regex(/^[a-zA-Z0-9_]+$/),
+});

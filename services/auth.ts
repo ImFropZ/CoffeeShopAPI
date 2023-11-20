@@ -1,11 +1,8 @@
+import { userSchema } from "./../schema";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
-import {
-  BadRequestError,
-  InternalError,
-  UnauthorizedError,
-} from "../models/error";
+import { BadRequestError, InternalError } from "../models/error";
 import {
   registerSchema,
   loginSchema,
@@ -30,13 +27,13 @@ class AuthService {
       });
 
     if (!user) {
-      throw new UnauthorizedError("User is not found");
+      throw new BadRequestError("User is not found");
     }
 
     const isCorrectPassword = bcrypt.compareSync(password, user.hashedPassword);
 
     if (!isCorrectPassword)
-      throw new UnauthorizedError("Password is not correct");
+      throw new BadRequestError("Password is not correct");
 
     return generateAccessToken(username);
   }
@@ -219,6 +216,28 @@ class AuthService {
     });
 
     return true;
+  }
+
+  async profile({ username }: z.infer<typeof userSchema>) {
+    const user = await this.prisma.user
+      .findUnique({
+        where: {
+          username,
+        },
+      })
+      .catch((_) => {
+        throw new InternalError("Something went wrong");
+      });
+
+    if (!user) {
+      throw new BadRequestError("User is not found");
+    }
+
+    return {
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
   }
 }
 
