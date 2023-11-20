@@ -15,16 +15,34 @@ import { transporter } from "../config/nodemailer";
 class AuthService {
   prisma = new PrismaClient();
 
-  async login({ username, password }: z.infer<typeof loginSchema>) {
-    const user = await this.prisma.user
-      .findUnique({
-        where: {
-          username,
-        },
-      })
-      .catch((_) => {
-        throw new InternalError("Something went wrong");
-      });
+  async login({ data, password }: z.infer<typeof loginSchema>) {
+    const username = data.includes("@") ? undefined : data;
+
+    let user = null;
+
+    if (username) {
+      user = await this.prisma.user
+        .findUnique({
+          where: {
+            username,
+          },
+        })
+        .catch((_) => {
+          console.log(_);
+          throw new InternalError("Something went wrong");
+        });
+    } else {
+      user = await this.prisma.user
+        .findUnique({
+          where: {
+            email: data,
+          },
+        })
+        .catch((_) => {
+          console.log(_);
+          throw new InternalError("Something went wrong");
+        });
+    }
 
     if (!user) {
       throw new BadRequestError("User is not found");
@@ -35,7 +53,7 @@ class AuthService {
     if (!isCorrectPassword)
       throw new BadRequestError("Password is not correct");
 
-    return generateAccessToken(username);
+    return generateAccessToken(user.username);
   }
 
   async register({
@@ -73,11 +91,11 @@ class AuthService {
 
     let user = null;
 
-    if (username === undefined) {
+    if (username) {
       user = await this.prisma.user
         .findUnique({
           where: {
-            email: data,
+            username,
           },
         })
         .catch((_) => {
@@ -87,7 +105,7 @@ class AuthService {
       user = await this.prisma.user
         .findUnique({
           where: {
-            username,
+            email: data,
           },
         })
         .catch((_) => {
