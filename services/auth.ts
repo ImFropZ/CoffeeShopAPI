@@ -162,20 +162,38 @@ class AuthService {
 
   async verifyToken({
     token,
-    username,
+    data,
     newPassword,
   }: z.infer<typeof verifyTokenSchema>) {
-    const passwordReset = await this.prisma.passwordReset
-      .findFirstOrThrow({
-        where: {
-          user: {
-            username,
+    const username = data.includes("@") ? undefined : data;
+
+    let passwordReset;
+
+    if (username === undefined) {
+      passwordReset = await this.prisma.passwordReset
+        .findFirstOrThrow({
+          where: {
+            user: {
+              email: data,
+            },
           },
-        },
-      })
-      .catch((_) => {
-        throw new BadRequestError("User doesn't have reset token");
-      });
+        })
+        .catch((_) => {
+          throw new BadRequestError("User doesn't have reset token");
+        });
+    } else {
+      passwordReset = await this.prisma.passwordReset
+        .findFirstOrThrow({
+          where: {
+            user: {
+              username,
+            },
+          },
+        })
+        .catch((_) => {
+          throw new BadRequestError("User doesn't have reset token");
+        });
+    }
 
     if (passwordReset.expiresAt < new Date()) {
       throw new BadRequestError("Token is expired");

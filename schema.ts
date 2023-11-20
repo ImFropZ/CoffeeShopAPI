@@ -19,7 +19,10 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const verifyTokenSchema = z.object({
-  username: z.string().regex(/^[a-zA-Z0-9_]+$/),
+  data: z
+    .string()
+    .email()
+    .or(z.string().regex(/^[a-zA-Z0-9_]+$/)),
   newPassword: z.string().min(6).max(100),
   token: z.string().length(6),
 });
