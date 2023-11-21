@@ -1,15 +1,15 @@
 import { Response, NextFunction, Request } from "express";
-import { UnauthorizedError } from "../models/error";
+import { ForbiddenError } from "../models/error";
 
 export async function adminValidatorMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const isAdmin = res.locals.user === "ADMIN";
+  const isAdmin = res.locals.user.role === "ADMIN";
 
   if (!isAdmin) {
-    throw new UnauthorizedError("You are not authorized");
+    throw new ForbiddenError("You are not allowed to access this resource");
   }
 
   next();
@@ -21,10 +21,10 @@ export async function cashierValidatorMiddleware(
   next: NextFunction
 ) {
   const isCashier =
-    res.locals.user === "CASHIER" || res.locals.user === "ADMIN";
+    res.locals.user.role === "CASHIER" || res.locals.user.role === "ADMIN";
 
   if (!isCashier) {
-    throw new UnauthorizedError("You are not authorized");
+    throw new ForbiddenError("You are not allowed to access this resource");
   }
 
   next();
@@ -35,10 +35,10 @@ export async function stockValidatorMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  const isStock = res.locals.user === "STOCK" || res.locals.user === "ADMIN";
+  const isStock = res.locals.user.role === "STOCK" || res.locals.user.role === "ADMIN";
 
   if (!isStock) {
-    throw new UnauthorizedError("You are not authorized");
+    throw new ForbiddenError("You are not allowed to access this resource");
   }
 
   next();
