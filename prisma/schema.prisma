@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  email          String?         @unique
-  username       String          @unique
+  id             String         @id @default(uuid())
+  email          String?        @unique
+  username       String         @unique
   hashedPassword String
-  role           Role            @default(USER)
-  roleId         Role            @default(USER)
+  role           Role           @default(USER)
+  roleId         Role           @default(USER)
   invoices       Invoice[]
-  PasswordReset  PasswordReset[]
+  passwordReset  PasswordReset?
 }
 
 model Customer {
@@ -34,26 +34,26 @@ enum Role {
 }
 
 model Stock {
-  id              String            @id @default(uuid())
-  name            String
-  stockItems      StockItem[]
-  stockReportItem StockReportItem[]
+  id               String            @id @default(uuid())
+  name             String
+  stockItems       StockItem[]
+  stockReportItems StockReportItem[]
 }
 
 model StockItem {
-  id              String            @id @default(uuid())
-  expiresDate     DateTime
-  quantity        Int
-  price           Decimal
-  stock           Stock             @relation(fields: [stockId], references: [id])
-  stockId         String
-  stockReportItem StockReportItem[]
+  id               String            @id @default(uuid())
+  expiresDate      DateTime
+  quantity         Int
+  price            Decimal
+  stock            Stock             @relation(fields: [stockId], references: [id])
+  stockId          String
+  stockReportItems StockReportItem[]
 }
 
 model StockReport {
-  id              String            @id @default(uuid())
-  createdAt       DateTime          @default(now())
-  stockReportItem StockReportItem[]
+  id               String            @id @default(uuid())
+  createdAt        DateTime          @default(now())
+  stockReportItems StockReportItem[]
 }
 
 model StockReportItem {
@@ -68,13 +68,13 @@ model StockReportItem {
 }
 
 model Menu {
-  id          String        @id @default(uuid())
-  name        String
-  price       Decimal
-  cupSize     CupSize
-  picture     String
-  isActive    Boolean       @default(true)
-  invoiceItem InvoiceItem[]
+  id           String        @id @default(uuid())
+  name         String
+  price        Decimal
+  cupSize      CupSize
+  picture      String
+  isActive     Boolean       @default(true)
+  invoiceItems InvoiceItem[]
 
   @@unique([name, cupSize])
 }
@@ -92,7 +92,6 @@ model Invoice {
 model InvoiceItem {
   id        String   @id @default(uuid())
   quantity  Int
-  cupSize   CupSize
   sugar     Float
   attribute String
   menu      Menu     @relation(fields: [menuId], references: [id])
@@ -113,5 +112,5 @@ model PasswordReset {
   createdAt DateTime @default(now())
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
-  userId    String
+  userId    String   @unique
 }

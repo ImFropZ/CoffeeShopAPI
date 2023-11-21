@@ -58,3 +58,15 @@ export const updateMenuSchema = z.object({
   price: z.number().min(0),
   cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
 });
+
+export const orderSchema = z.object({
+  menus: z.array(
+    z.object({
+      id: z.string(),
+      quantity: z.number().min(1),
+      sugar: z.number(),
+      attribute: z.string(),
+    })
+  ),
+  customerId: z.string().optional(),
+});
