@@ -1,6 +1,6 @@
 import { Response, NextFunction, Request } from "express";
 import { getCookie, verifyAccessToken } from "../utils";
-import { UnauthorizedError } from "../models/error";
+import { ForbiddenError, UnauthorizedError } from "../models/error";
 import { prisma } from "../config/prisma";
 
 export async function authorizeMiddleware(
@@ -26,14 +26,18 @@ export async function authorizeMiddleware(
   const { username } = verifyAccessToken(token ?? "") ?? { username: "" };
 
   if (!username) {
-    throw new UnauthorizedError("You are not logged in");
+    throw new ForbiddenError("The token is invalid or expired");
   }
 
-  const user = await prisma.user.findFirstOrThrow({
-    where: {
-      username,
-    },
-  });
+  const user = await prisma.user
+    .findFirstOrThrow({
+      where: {
+        username,
+      },
+    })
+    .catch((_) => {
+      throw new ForbiddenError("User not found");
+    });
 
   res.locals.user = {
     username: user.username,
