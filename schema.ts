@@ -70,3 +70,15 @@ export const orderSchema = z.object({
   ),
   customerId: z.string().optional(),
 });
+
+export const createCustomerSchema = z.object({
+  name: z.string().min(3).max(100),
+  phone: z.string().min(3).max(100).optional(),
+  address: z.string().min(3).max(100).optional(),
+});
+
+export const updateCustomerSchema = z.object({
+  name: z.string().min(3).max(100).optional(),
+  phone: z.string().min(3).max(100).optional(),
+  address: z.string().min(3).max(100).optional(),
+});
