@@ -5,8 +5,18 @@ import { createMenu, menus, updateMenu } from "../controllers/menu";
 import { adminValidatorMiddleware } from "../middlewares/roleValidatorMiddlware";
 const api = Router();
 
-api.get("/", authorizeMiddleware, use(menus));
-api.post("/", authorizeMiddleware, adminValidatorMiddleware, use(createMenu));
-api.put("/:id", authorizeMiddleware, adminValidatorMiddleware, use(updateMenu));
+api.get("/", use(authorizeMiddleware), use(menus));
+api.post(
+  "/",
+  use(authorizeMiddleware),
+  use(adminValidatorMiddleware),
+  use(createMenu)
+);
+api.put(
+  "/:id",
+  use(authorizeMiddleware),
+  use(adminValidatorMiddleware),
+  use(updateMenu)
+);
 
 export default api;

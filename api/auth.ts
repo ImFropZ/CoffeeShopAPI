@@ -20,6 +20,6 @@ api.post("/logout", use(logout));
 api.post("/forgot-password", use(forgotPassword));
 api.post("/verify-token", use(verifyToken));
 
-api.put("/me", authorizeMiddleware, use(updateProfile));
+api.put("/me", use(authorizeMiddleware), use(updateProfile));
 
 export default api;
