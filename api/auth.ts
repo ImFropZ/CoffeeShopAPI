@@ -12,7 +12,7 @@ import { use } from "../utils";
 import { authorizeMiddleware } from "../middlewares/authorizeMiddleware";
 const api = Router();
 
-api.get("/me", authorizeMiddleware, use(profile));
+api.get("/me", use(authorizeMiddleware), use(profile));
 
 api.post("/login", use(login));
 api.post("/register", use(register));
