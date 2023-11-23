@@ -31,7 +31,12 @@ api.post(
   use(stockValidatorMiddleware),
   use(createStock)
 );
-api.post("/:id/items", use(authorizeMiddleware), use(addItemToStock));
+api.post(
+  "/:id/items",
+  use(authorizeMiddleware),
+  use(stockValidatorMiddleware),
+  use(addItemToStock)
+);
 
 api.put(
   "/:id",
@@ -39,9 +44,25 @@ api.put(
   use(stockValidatorMiddleware),
   use(updateStock)
 );
-api.put("/:id/items", use(authorizeMiddleware), use(updateStockItem));
 
-api.delete("/:id", use(authorizeMiddleware), use(removeStock));
-api.delete("/:id/items", use(authorizeMiddleware), use(removeItemFromStock));
+api.put(
+  "/items",
+  use(authorizeMiddleware),
+  use(stockValidatorMiddleware),
+  use(updateStockItem)
+);
+
+api.delete(
+  "/:id",
+  use(authorizeMiddleware),
+  use(stockValidatorMiddleware),
+  use(removeStock)
+);
+api.delete(
+  "/:id/items",
+  use(authorizeMiddleware),
+  use(stockValidatorMiddleware),
+  use(removeItemFromStock)
+);
 
 export default api;
