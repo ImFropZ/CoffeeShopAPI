@@ -44,7 +44,7 @@ export async function authorizeMiddleware(
         username,
       },
     })
-    .catch((_) => {
+    .catch(() => {
       throw new ForbiddenError("User not found");
     });
 

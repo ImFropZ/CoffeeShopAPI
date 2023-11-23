@@ -49,7 +49,7 @@ class CustomerService {
           ...(address ? { address } : {}),
         },
       })
-      .catch((_) => {
+      .catch(() => {
         throw new BadRequestError("User not found");
       });
   }

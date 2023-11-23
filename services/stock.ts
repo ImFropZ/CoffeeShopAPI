@@ -91,7 +91,9 @@ class StockService {
         },
       });
 
-      const fromQty = items.find((item) => item.id === stockItem.id)?.quantity;
+      const fromQty = items.find(
+        (item: { id: string }) => item.id === stockItem.id
+      )?.quantity;
 
       if (fromQty === undefined)
         throw new BadRequestError("Unable to find the stock id");
