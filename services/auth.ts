@@ -4,7 +4,6 @@ import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
 import {
   BadRequestError,
-  ForbiddenError,
   InternalError,
 } from "../models/error";
 import {
@@ -31,8 +30,8 @@ class AuthService {
             username,
           },
         })
-        .catch((_) => {
-          console.log(_);
+        .catch((error: Error) => {
+          console.log(error);
           throw new InternalError("Something went wrong");
         });
     } else {
@@ -42,8 +41,8 @@ class AuthService {
             email: data,
           },
         })
-        .catch((_) => {
-          console.log(_);
+        .catch((error: Error) => {
+          console.log(error);
           throw new InternalError("Something went wrong");
         });
     }
@@ -74,7 +73,8 @@ class AuthService {
           role: "USER",
         },
       })
-      .catch((_) => {
+      .catch((error: Error) => {
+        console.log(error);
         throw new InternalError("Something went wrong");
       });
 
@@ -102,7 +102,8 @@ class AuthService {
             username,
           },
         })
-        .catch((_) => {
+        .catch((error: Error) => {
+          console.log(error);
           throw new InternalError("Something went wrong");
         });
     } else {
@@ -112,7 +113,8 @@ class AuthService {
             email: data,
           },
         })
-        .catch((_) => {
+        .catch((error: Error) => {
+          console.log(error);
           throw new InternalError("Something went wrong");
         });
     }
@@ -197,7 +199,7 @@ class AuthService {
             },
           },
         })
-        .catch((_) => {
+        .catch(() => {
           throw new BadRequestError("User doesn't have reset token");
         });
     } else {
@@ -209,7 +211,7 @@ class AuthService {
             },
           },
         })
-        .catch((_) => {
+        .catch(() => {
           throw new BadRequestError("User doesn't have reset token");
         });
     }
@@ -250,7 +252,8 @@ class AuthService {
           invoices: true,
         },
       })
-      .catch((_) => {
+      .catch((error: Error) => {
+        console.log(error);
         throw new InternalError("Something went wrong");
       });
 
@@ -277,7 +280,7 @@ class AuthService {
           where: { username: user.username },
           select: { hashedPassword: true },
         })
-        .catch((_) => {
+        .catch(() => {
           throw new BadRequestError("User is not found");
         });
 
@@ -312,7 +315,8 @@ class AuthService {
             role: userToUpdate.role,
           },
         })
-        .catch((_) => {
+        .catch((error: Error) => {
+          console.log(error);
           throw new InternalError("Something went wrong");
         });
 

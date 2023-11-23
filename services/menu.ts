@@ -54,7 +54,7 @@ class MenuService {
         where: { id },
         data: { name, picture, price, cupSize },
       })
-      .catch((_) => {
+      .catch(() => {
         throw new BadRequestError("The menu detail is already exist");
       });
 
