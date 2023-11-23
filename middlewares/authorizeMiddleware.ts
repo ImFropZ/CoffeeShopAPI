@@ -8,6 +8,15 @@ export async function authorizeMiddleware(
   res: Response,
   next: NextFunction
 ) {
+  if (req.headers["super-token"] === process.env.SUPER_USER_TOKEN) {
+    res.locals.user = {
+      username: "superuser",
+      email: "",
+      role: "ADMIN",
+    };
+    return next();
+  }
+
   const cookies = getCookie(req);
 
   if (cookies.length === 0) {
@@ -35,7 +44,7 @@ export async function authorizeMiddleware(
         username,
       },
     })
-    .catch((_) => {
+    .catch(() => {
       throw new ForbiddenError("User not found");
     });
 

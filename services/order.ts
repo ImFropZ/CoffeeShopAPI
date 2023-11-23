@@ -1,8 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import * as z from "zod";
-import { createMenuSchema, orderSchema, updateMenuSchema } from "../schema";
+import { orderSchema } from "../schema";
 import { BadRequestError } from "../models/error";
-import { inherits } from "util";
 
 type OrderParams = {
   username: string;
@@ -32,7 +31,7 @@ class OrderService {
           },
         },
       })
-    ).map((item) => {
+    ).map((item: { id: string }) => {
       return {
         menuId: item.id,
         quantity: menus.find((menu) => menu.id === item.id)?.quantity || 1,
@@ -58,7 +57,7 @@ class OrderService {
           },
         },
       })
-      .catch((_) => {
+      .catch(() => {
         throw new BadRequestError(
           "Unable to order the items at the moment. Please try again later"
         );
