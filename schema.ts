@@ -94,12 +94,12 @@ export const updateStockSchema = z.object({
 export const stockItemSchema = z.object({
   quantity: z.number().min(1).int(),
   price: z.number().min(0),
-  expiresDate: z.date(),
+  expiresDate: z.coerce.date(),
 });
 
 export const updateStockItemSchema = z.array(
   z.object({
-    id: z.string(),
+    id: z.string().uuid(),
     quantity: z.number().int().min(0),
   })
 );

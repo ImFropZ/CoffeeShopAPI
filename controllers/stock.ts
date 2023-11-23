@@ -105,7 +105,11 @@ export async function addItemToStock(req: Request, res: Response) {
       throw new BadRequestError("Invalid stock id");
     });
 
-  const createdStockItem = await stockService.addStockItem(id, stockItem);
+  const createdStockItem = await stockService
+    .addStockItem(id, stockItem)
+    .catch((_) => {
+      throw new BadRequestError("Invalid stock id");
+    });
 
   res.json({ data: createdStockItem });
 }
@@ -125,7 +129,7 @@ export async function updateStockItem(req: Request, res: Response) {
   const stockItems = await updateStockItemSchema
     .parseAsync(req.body)
     .catch((_) => {
-      throw new BadRequestError("Invalid stock data");
+      throw new BadRequestError("Invalid stock items data");
     });
 
   await stockService.updateStockItem(stockItems);

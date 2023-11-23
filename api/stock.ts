@@ -19,10 +19,10 @@ import {
 const api = Router();
 
 api.get("/", use(authorizeMiddleware), use(stocks));
+api.get("/reports", use(authorizeMiddleware), use(stockReports));
+
 api.get("/:id", use(authorizeMiddleware), use(stock));
 api.get("/:id/items", use(authorizeMiddleware), use(stockItems));
-
-api.get("/reports", use(authorizeMiddleware), use(stockReports));
 api.get("/:id/reports", use(authorizeMiddleware), use(stockReport));
 
 api.post(
@@ -31,6 +31,7 @@ api.post(
   use(stockValidatorMiddleware),
   use(createStock)
 );
+
 api.post(
   "/:id/items",
   use(authorizeMiddleware),
@@ -39,17 +40,17 @@ api.post(
 );
 
 api.put(
-  "/:id",
-  use(authorizeMiddleware),
-  use(stockValidatorMiddleware),
-  use(updateStock)
-);
-
-api.put(
   "/items",
   use(authorizeMiddleware),
   use(stockValidatorMiddleware),
   use(updateStockItem)
+);
+
+api.put(
+  "/:id",
+  use(authorizeMiddleware),
+  use(stockValidatorMiddleware),
+  use(updateStock)
 );
 
 api.delete(

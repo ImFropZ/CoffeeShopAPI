@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { stockItemSchema, updateStockItemSchema } from "../schema";
 import * as z from "zod";
+import { BadRequestError } from "../models/error";
 
 class StockService {
   prisma = new PrismaClient();
@@ -71,6 +72,14 @@ class StockService {
       },
     });
 
+    const items = await this.prisma.stockItem.findMany({
+      where: {
+        id: {
+          in: stockItems.map((stockItem) => stockItem.id),
+        },
+      },
+    });
+
     // Loop through the array of stock items and update each item
     for (const stockItem of stockItems) {
       const item = await this.prisma.stockItem.update({
@@ -82,10 +91,15 @@ class StockService {
         },
       });
 
+      const fromQty = items.find((item) => item.id === stockItem.id)?.quantity;
+
+      if (fromQty === undefined)
+        throw new BadRequestError("Unable to find the stock id");
+
       // Add to stock report
       await this.prisma.stockReportItem.create({
         data: {
-          quantity: stockItem.quantity,
+          quantity: item.quantity - fromQty,
           stockItemId: stockItem.id,
           stockId: item.stockId,
           stockReportId: stockReport.id,
@@ -125,13 +139,15 @@ class StockService {
         id: id,
       },
       include: {
-        stockItems: true,
+        stockReportItems: true,
       },
     });
   }
 
   async getStockReports() {
-    return await this.prisma.stockReport.findMany();
+    return await this.prisma.stockReport.findMany({
+      include: { stockReportItems: { include: { stock: true } } },
+    });
   }
 }
 
