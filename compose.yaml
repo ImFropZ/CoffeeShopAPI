@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: CoffeeShopPostgres
+    hostname: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: CoffeeShop
+
+  api:
+    build: .
+    container_name: CoffeeShopAPI
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@CoffeeShopPostgres:5432/CoffeeShop?schema=public
+      ACCESS_TOKEN_SECRET: access_token_secret
+      SUPER_USER_TOKEN: your_super_user_token
+      SMTP_HOST:
+      SMTP_PORT:
+      SMTP_EMAIL:
+      SMTP_EMAIL_PASSWORD:
+      FROM_EMAIL: example@foo.com
+    restart: always
