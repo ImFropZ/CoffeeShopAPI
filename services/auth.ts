@@ -2,10 +2,7 @@ import { updateUserSchema, userLocalsSchema } from "./../schema";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
-import {
-  BadRequestError,
-  InternalError,
-} from "../models/error";
+import { BadRequestError, InternalError } from "../models/error";
 import {
   registerSchema,
   loginSchema,
@@ -56,7 +53,7 @@ class AuthService {
     if (!isCorrectPassword)
       throw new BadRequestError("Password is not correct");
 
-    return generateAccessToken(user.username);
+    return { token: generateAccessToken(user.username), role: user.role };
   }
 
   async register({

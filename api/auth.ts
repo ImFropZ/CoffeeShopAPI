@@ -3,7 +3,6 @@ import {
   verifyToken,
   forgotPassword,
   login,
-  logout,
   register,
   profile,
   updateProfile,
@@ -16,7 +15,6 @@ api.get("/me", use(authorizeMiddleware), use(profile));
 
 api.post("/login", use(login));
 api.post("/register", use(register));
-api.post("/logout", use(logout));
 api.post("/forgot-password", use(forgotPassword));
 api.post("/verify-token", use(verifyToken));
 

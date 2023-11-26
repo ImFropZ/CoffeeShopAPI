@@ -26,12 +26,6 @@ export const use =
   (req: Request, res: Response, next: NextFunction) =>
     Promise.resolve(fn(req, res, next)).catch(next);
 
-export function getCookie(req: Request) {
-  var cookie = req.headers.cookie;
-  if (!cookie) return [];
-  return cookie.split("; ");
-}
-
 export function generateToken(length = 3) {
   return crypto.randomBytes(length).toString("hex");
 }

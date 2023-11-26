@@ -8,22 +8,20 @@ import {
   verifyTokenSchema,
 } from "../schema";
 import { BadRequestError } from "../models/error";
-import { generateAccessToken, getCookie } from "../utils";
+import { generateAccessToken } from "../utils";
 
 export async function login(req: Request, res: Response) {
   const loginCredentials = await loginSchema.parseAsync(req.body).catch((_) => {
     throw new BadRequestError("Invalid login credentials");
   });
 
-  const token = await authService.login(loginCredentials);
-
-  res.cookie("access-token", token, {
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    httpOnly: true,
-  });
+  const { token, role } = await authService.login(loginCredentials);
 
   res.json({
-    message: "Successfully logged",
+    accessToken: token,
+    tokenType: "Bearer",
+    expiresIn: 1000 * 60 * 60 * 24 * 7, // 7 days
+    role: role,
   });
 }
 
@@ -37,29 +35,6 @@ export async function register(req: Request, res: Response) {
   const user = await authService.register(registerCredentials);
 
   return res.json(user);
-}
-
-export async function logout(req: Request, res: Response) {
-  let isLogin = false;
-  const cookies = getCookie(req);
-
-  if (cookies.length === 0) {
-    throw new BadRequestError("You are not logged in");
-  }
-
-  cookies.forEach((cookie) => {
-    const [key, _] = cookie.split("=");
-    if (key === "access-token") {
-      isLogin = true;
-    }
-  });
-
-  if (!isLogin) {
-    throw new BadRequestError("You are not logged in");
-  }
-
-  res.clearCookie("access-token");
-  res.json({ message: "Logged out" });
 }
 
 export async function forgotPassword(req: Request, res: Response) {

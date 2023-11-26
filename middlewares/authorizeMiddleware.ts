@@ -1,5 +1,5 @@
 import { Response, NextFunction, Request } from "express";
-import { getCookie, verifyAccessToken } from "../utils";
+import { verifyAccessToken } from "../utils";
 import { ForbiddenError, UnauthorizedError } from "../models/error";
 import { prisma } from "../config/prisma";
 
@@ -17,22 +17,15 @@ export async function authorizeMiddleware(
     return next();
   }
 
-  const cookies = getCookie(req);
+  const authorization = req.headers["authorization"];
 
-  if (cookies.length === 0) {
+  if (!authorization) {
     throw new UnauthorizedError("You are not logged in");
   }
 
-  let token = null;
-
-  cookies.forEach((cookie) => {
-    const [key, value] = cookie.split("=");
-    if (key === "access-token") {
-      token = value;
-    }
-  });
-
-  const { username } = verifyAccessToken(token ?? "") ?? { username: "" };
+  const { username } = verifyAccessToken(authorization.split(" ")[1] ?? "") ?? {
+    username: "",
+  };
 
   if (!username) {
     throw new ForbiddenError("The token is invalid or expired");
