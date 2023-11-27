@@ -37,6 +37,7 @@ class OrderService {
         quantity: menus.find((menu) => menu.id === item.id)?.quantity || 1,
         sugar: menus.find((menu) => menu.id === item.id)?.sugar || 1,
         attribute: menus.find((menu) => menu.id === item.id)?.attribute || "",
+        ice: menus.find((menu) => menu.id === item.id)?.ice || 1,
       };
     });
 

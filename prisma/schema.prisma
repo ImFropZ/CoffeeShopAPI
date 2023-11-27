@@ -93,6 +93,7 @@ model InvoiceItem {
   id        String   @id @default(uuid())
   quantity  Int
   sugar     Float
+  ice       Float
   attribute String
   menu      Menu     @relation(fields: [menuId], references: [id])
   menuId    String

@@ -60,14 +60,17 @@ export const updateMenuSchema = z.object({
 });
 
 export const orderSchema = z.object({
-  menus: z.array(
-    z.object({
-      id: z.string(),
-      quantity: z.number().min(1),
-      sugar: z.number(),
-      attribute: z.string(),
-    })
-  ),
+  menus: z
+    .array(
+      z.object({
+        id: z.string(),
+        quantity: z.number().min(1),
+        sugar: z.number(),
+        ice: z.number(),
+        attribute: z.string(),
+      })
+    )
+    .min(1),
   customerId: z.string().optional(),
 });
 

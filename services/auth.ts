@@ -70,9 +70,8 @@ class AuthService {
           role: "USER",
         },
       })
-      .catch((error: Error) => {
-        console.log(error);
-        throw new InternalError("Something went wrong");
+      .catch(() => {
+        throw new BadRequestError("User is already exist");
       });
 
     if (!user) {

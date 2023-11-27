@@ -21,14 +21,18 @@ class MenuService {
     cupSize,
     price,
   }: z.infer<typeof createMenuSchema>) {
-    const menu = await this.prisma.menu.create({
-      data: {
-        name,
-        picture,
-        price,
-        cupSize,
-      },
-    });
+    const menu = await this.prisma.menu
+      .create({
+        data: {
+          name,
+          picture,
+          price,
+          cupSize,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestError("The menu is already exist");
+      });
     return {
       id: menu.id,
       name: menu.name,
