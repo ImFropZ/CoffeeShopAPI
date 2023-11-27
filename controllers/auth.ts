@@ -8,7 +8,6 @@ import {
   verifyTokenSchema,
 } from "../schema";
 import { BadRequestError } from "../models/error";
-import { generateAccessToken } from "../utils";
 
 export async function login(req: Request, res: Response) {
   const loginCredentials = await loginSchema.parseAsync(req.body).catch((_) => {
@@ -89,11 +88,6 @@ export async function updateProfile(req: Request, res: Response) {
   });
 
   const userDetails = await authService.updateProfile(user, userUpdate);
-
-  res.cookie("access-token", generateAccessToken(userDetails.username), {
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    httpOnly: true,
-  });
 
   res.json(userDetails);
 }
