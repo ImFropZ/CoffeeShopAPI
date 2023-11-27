@@ -5,7 +5,36 @@ import { BadRequestError } from "../models/error";
 
 export async function menus(req: Request, res: Response) {
   const menus = await menuService.menus();
-  res.json({ data: menus });
+
+  // Filter array of object and get the name of the menu only unique
+  const menuNames = menus
+    .filter((menu, index, self) => {
+      return index === self.findIndex((m) => m.name === menu.name);
+    })
+    .map((menu) => {
+      return {
+        name: menu.name,
+        picture: menu.picture,
+      };
+    });
+
+  const menuResponse = menuNames.map((menu) => {
+    const items = menus.filter((m) => m.name === menu.name);
+
+    return {
+      ...menu,
+      data: items.map((m) => {
+        return {
+          id: m.id,
+          picture: m.picture,
+          price: m.price,
+          cupSize: m.cupSize,
+        };
+      }),
+    };
+  });
+
+  res.json({ data: menuResponse });
 }
 
 export async function createMenu(req: Request, res: Response) {
