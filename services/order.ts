@@ -31,13 +31,14 @@ class OrderService {
           },
         },
       })
-    ).map((item: { id: string }) => {
+    ).map((item: { id: string; price: any }) => {
       return {
         menuId: item.id,
         quantity: menus.find((menu) => menu.id === item.id)?.quantity || 1,
         sugar: menus.find((menu) => menu.id === item.id)?.sugar || 1,
         attribute: menus.find((menu) => menu.id === item.id)?.attribute || "",
         ice: menus.find((menu) => menu.id === item.id)?.ice || 1,
+        price: item.price,
       };
     });
 

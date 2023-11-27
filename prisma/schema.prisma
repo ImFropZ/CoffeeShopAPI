@@ -94,6 +94,7 @@ model InvoiceItem {
   quantity  Int
   sugar     Float
   ice       Float
+  price     Decimal  @default(0)
   attribute String
   menu      Menu     @relation(fields: [menuId], references: [id])
   menuId    String
