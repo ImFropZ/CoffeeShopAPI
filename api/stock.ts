@@ -60,7 +60,7 @@ api.delete(
   use(removeStock)
 );
 api.delete(
-  "/:id/items",
+  "/:stockId/items/:id",
   use(authorizeMiddleware),
   use(stockValidatorMiddleware),
   use(removeItemFromStock)

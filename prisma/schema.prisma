@@ -36,7 +36,7 @@ enum Role {
 model Stock {
   id               String            @id @default(uuid())
   name             String
-  stockItems       StockItem[]
+  items            StockItem[]
   stockReportItems StockReportItem[]
 }
 

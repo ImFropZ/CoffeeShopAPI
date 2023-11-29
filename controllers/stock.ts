@@ -115,14 +115,28 @@ export async function addItemToStock(req: Request, res: Response) {
 }
 
 export async function removeItemFromStock(req: Request, res: Response) {
-  const id = await z
+  const stockId = await z
+    .string()
+    .uuid()
+    .parseAsync(req.params.stockId)
+    .catch((_) => {
+      throw new BadRequestError("Invalid stock id");
+    });
+
+  const stockItemId = await z
     .string()
     .uuid()
     .parseAsync(req.params.id)
     .catch((_) => {
-      throw new BadRequestError("Invalid stock id");
+      throw new BadRequestError("Invalid stock item id");
     });
-  res.json({ data: "Remove Item From Stock" });
+
+  const removedStockItem = await stockService.removeStockItem(
+    stockId,
+    stockItemId
+  );
+
+  res.json({ data: removedStockItem });
 }
 
 export async function updateStockItem(req: Request, res: Response) {
@@ -132,20 +146,7 @@ export async function updateStockItem(req: Request, res: Response) {
       throw new BadRequestError("Invalid stock items data");
     });
 
-  await stockService.updateStockItem(stockItems);
+  const updatedStockItem = await stockService.updateStockItem(stockItems);
 
-  res.json({ data: "Update Stock Item" });
-}
-
-export async function removeStockItem(req: Request, res: Response) {
-  const id = await z
-    .string()
-    .uuid()
-    .parseAsync(req.params.id)
-    .catch((_) => {
-      throw new BadRequestError("Invalid stock id");
-    });
-
-  const removedStockItem = await stockService.removeStockItem(id);
-  res.json({ data: removedStockItem });
+  res.json({ data: updatedStockItem });
 }

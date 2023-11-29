@@ -9,7 +9,7 @@ class StockService {
   StockService() {}
 
   async getStocks() {
-    return await this.prisma.stock.findMany();
+    return await this.prisma.stock.findMany({ include: { items: true } });
   }
 
   async getStock(id: string) {
@@ -127,10 +127,11 @@ class StockService {
     });
   }
 
-  async removeStockItem(id: string) {
+  async removeStockItem(stockId: string, itemId: string) {
     return await this.prisma.stockItem.delete({
       where: {
-        id: id,
+        id: itemId,
+        stockId: stockId,
       },
     });
   }
