@@ -14,7 +14,7 @@ export async function order(req: Request, res: Response) {
       throw new BadRequestError("Invalid user data");
     });
 
-  const isSuccess = orderService.order({ ...order, username: username });
+  const isSuccess = await orderService.order({ ...order, username: username });
 
   if (!isSuccess) {
     throw new BadRequestError(

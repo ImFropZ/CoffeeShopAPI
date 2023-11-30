@@ -42,7 +42,7 @@ class OrderService {
       };
     });
 
-    if (menuItems.length !== menus.length) {
+    if (menuItems.length === 0 && menuItems.length !== menus.length) {
       throw new BadRequestError("Invalid menu data");
     }
 

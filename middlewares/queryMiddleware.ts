@@ -10,8 +10,6 @@ export async function queryMiddleware(
   const { query } = req;
   const { start_date, end_date } = query;
 
-  console.log(start_date, end_date);
-
   if (start_date && !end_date) {
     throw new BadRequestError("end_date query is required");
   }

@@ -9,12 +9,23 @@ class CustomerService {
   CustomerService() {}
 
   async getCustomers() {
-    return this.prisma.customer.findMany();
+    return this.prisma.customer.findMany({
+      include: {
+        invoices: {
+          include: { items: true },
+        },
+      },
+    });
   }
 
   async getCustomer(id: string) {
     return this.prisma.customer.findUnique({
       where: { id },
+      include: {
+        invoices: {
+          include: { items: true },
+        },
+      },
     });
   }
 
