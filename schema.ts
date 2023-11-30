@@ -9,6 +9,7 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
+  fullName: z.string().min(3).max(100),
   username: z.string().regex(/^[a-zA-Z0-9_]+$/),
   password: z.string().min(6).max(100),
   email: z.string().email().optional(),
@@ -37,9 +38,13 @@ export const userLocalsSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  username: z.string().regex(/^[a-zA-Z0-9_]+$/),
-  email: z.string().email().nullable(),
-  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]).default("USER"),
+  fullName: z.string().optional(),
+  username: z
+    .string()
+    .regex(/^[a-zA-Z0-9_]+$/)
+    .optional(),
+  email: z.string().email().optional(),
+  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]).optional(),
   oldPassword: z.string().min(6).max(100).optional(),
   newPassword: z.string().min(6).max(100).optional(),
 });

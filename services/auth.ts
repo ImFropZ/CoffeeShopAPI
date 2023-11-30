@@ -57,6 +57,7 @@ class AuthService {
   }
 
   async register({
+    fullName,
     username,
     password,
     email,
@@ -64,6 +65,7 @@ class AuthService {
     const user = await this.prisma.user
       .create({
         data: {
+          fullName,
           username,
           hashedPassword: await bcrypt.hash(password, 10),
           email,
@@ -79,6 +81,7 @@ class AuthService {
     }
 
     return {
+      fullName: user.fullName,
       username: user.username,
       email: user.email,
       role: user.role,
@@ -258,6 +261,7 @@ class AuthService {
     }
 
     return {
+      fullName: user.fullName,
       username: user.username,
       email: user.email,
       role: user.role,
@@ -291,13 +295,15 @@ class AuthService {
 
       await this.prisma.user.update({
         where: {
-          username: userToUpdate.username,
+          username: user.username,
         },
         data: {
           hashedPassword: await bcrypt.hash(userToUpdate.newPassword, 10),
         },
       });
     }
+
+    const { email, fullName, role, username } = userToUpdate;
 
     if (user.role === "ADMIN") {
       const updatedUser = await this.prisma.user
@@ -306,9 +312,10 @@ class AuthService {
             username: user.username,
           },
           data: {
-            username: userToUpdate.username,
-            email: userToUpdate.email,
-            role: userToUpdate.role,
+            ...(fullName ? { fullName } : {}),
+            ...(username ? { username } : {}),
+            ...(email ? { email } : {}),
+            ...(role ? { role } : {}),
           },
         })
         .catch((error: Error) => {
@@ -332,8 +339,9 @@ class AuthService {
         username: user.username,
       },
       data: {
-        username: userToUpdate.username,
-        email: userToUpdate.email,
+        ...(fullName ? { fullName } : {}),
+        ...(username ? { username } : {}),
+        ...(email ? { email } : {}),
       },
     });
 
