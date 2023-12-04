@@ -39,22 +39,28 @@ export async function menus(req: Request, res: Response) {
 
 export async function createMenu(req: Request, res: Response) {
   const menu = await createMenuSchema.parseAsync(req.body).catch((_) => {
+    console.log(_);
     throw new BadRequestError("Invalid menu data");
   });
 
-  const createdMenu = await menuService.createMenu(menu);
+  const createdMenu = await menuService.createMenu({
+    ...menu,
+    picture: (res.locals.menu?.picture as Buffer) ?? undefined,
+  });
   res.json({ data: createdMenu });
 }
 
 export async function updateMenu(req: Request, res: Response) {
   const { id } = req.params;
-  const menu = await updateMenuSchema
-    .parseAsync({ id, ...req.body })
-    .catch((_) => {
-      throw new BadRequestError("Invalid menu data");
-    });
+  const menu = await updateMenuSchema.parseAsync(req.body).catch((_) => {
+    throw new BadRequestError("Invalid menu data");
+  });
 
-  const updatedMenu = await menuService.updateMenu(menu);
+  const updatedMenu = await menuService.updateMenu({
+    ...menu,
+    id,
+    picture: res.locals.menu.picture ?? undefined,
+  });
 
   res.json({ data: updatedMenu });
 }

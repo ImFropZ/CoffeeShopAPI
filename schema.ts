@@ -51,17 +51,14 @@ export const updateUserSchema = z.object({
 
 export const createMenuSchema = z.object({
   name: z.string().min(3).max(100),
-  picture: z.string().url(),
-  price: z.number().min(0),
+  price: z.preprocess((val) => Number(val), z.number().min(0)),
   cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
 });
 
 export const updateMenuSchema = z.object({
-  id: z.string(),
-  name: z.string().min(3).max(100),
-  picture: z.string().url(),
-  price: z.number().min(0),
-  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+  name: z.string().min(3).max(100).optional(),
+  price: z.preprocess((val) => Number(val), z.number().min(0)).optional(),
+  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]).optional(),
 });
 
 export const orderSchema = z.object({
@@ -79,7 +76,7 @@ export const orderSchema = z.object({
   customerId: z.string().optional(),
 });
 
-export const createCustomerSchema = z.object({  
+export const createCustomerSchema = z.object({
   name: z.string().min(3).max(100),
   phone: z.string().min(3).max(20).optional(),
   address: z.string().min(3).max(100).optional(),
