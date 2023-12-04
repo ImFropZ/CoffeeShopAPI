@@ -13,6 +13,7 @@ model User {
   email          String?        @unique
   username       String         @unique
   hashedPassword String
+  picture        String?
   role           Role           @default(USER)
   roleId         Role           @default(USER)
   invoices       Invoice[]

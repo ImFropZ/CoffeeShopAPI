@@ -266,6 +266,9 @@ class AuthService {
       email: user.email,
       role: user.role,
       invoices: user.invoices,
+      picture: {
+        url: user.picture,
+      }
     };
   }
 
@@ -349,6 +352,9 @@ class AuthService {
       username: updatedUser.username,
       email: updatedUser.email,
       role: user.role,
+      picture: {
+        url: updatedUser.picture,
+      },
     };
   }
 }
