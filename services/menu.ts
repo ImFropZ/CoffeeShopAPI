@@ -47,7 +47,7 @@ class MenuService {
             },
             async (err, result) => {
               if (err || !result) {
-                throw new BadRequestError("Something went wrong.");
+                return reject(new BadRequestError("Something went wrong."));
               }
 
               const { picture } = await this.prisma.menu
@@ -70,7 +70,10 @@ class MenuService {
           )
           .end(picture);
       }
-    );
+    ).catch(async (err) => {
+      await this.prisma.menu.delete({ where: { id: menu.id } });
+      throw err;
+    });
 
     return {
       id: menu.id,
