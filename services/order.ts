@@ -1,14 +1,14 @@
-import { PrismaClient } from "@prisma/client";
 import * as z from "zod";
 import { orderSchema } from "../schema";
 import { BadRequestError } from "../models/error";
+import { prisma } from "../config/prisma";
 
 type OrderParams = {
   username: string;
 } & z.infer<typeof orderSchema>;
 
 class OrderService {
-  prisma = new PrismaClient();
+  prisma = prisma;
 
   OrderService() {}
 

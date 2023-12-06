@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import { BadRequestError } from "../models/error";
 import { Moment } from "moment";
+import { prisma } from "../config/prisma";
 
 class InvoiceService {
-  prisma = new PrismaClient();
+  prisma = prisma;
 
   async getInvoices(dateRange: { start: Moment; end: Moment } | undefined) {
     if (!dateRange) {

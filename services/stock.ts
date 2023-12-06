@@ -1,10 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import { stockItemSchema, updateStockItemSchema } from "../schema";
 import * as z from "zod";
 import { BadRequestError } from "../models/error";
+import { prisma } from "../config/prisma";
 
 class StockService {
-  prisma = new PrismaClient();
+  prisma = prisma;
 
   StockService() {}
 
