@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { use } from "../utils";
 import { authorizeMiddleware } from "../middlewares/authorizeMiddleware";
-import { createMenu, menus, updateMenu } from "../controllers/menu";
+import { createMenu, menus, updateMenu, updateMenuItem } from "../controllers/menu";
 import { adminValidatorMiddleware } from "../middlewares/roleValidatorMiddlware";
 import { upload } from "../config/multer";
 import { menuPictureMiddleware } from "../middlewares/menuPictureMiddleware";
@@ -12,17 +12,21 @@ api.post(
   "/",
   use(authorizeMiddleware),
   use(adminValidatorMiddleware),
-  use(upload),
-  use(menuPictureMiddleware),
   use(createMenu)
 );
 api.put(
   "/:id",
   use(authorizeMiddleware),
   use(adminValidatorMiddleware),
+  use(updateMenu)
+);
+api.put(
+  "/:id/items",
+  use(authorizeMiddleware),
+  use(adminValidatorMiddleware),
   use(upload),
   use(menuPictureMiddleware),
-  use(updateMenu)
+  use(updateMenuItem)
 );
 
 export default api;

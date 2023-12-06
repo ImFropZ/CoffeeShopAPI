@@ -1,5 +1,9 @@
 import * as z from "zod";
-import { createMenuSchema, updateMenuSchema } from "../schema";
+import {
+  createMenuSchema,
+  updateMenuItemSchema,
+  updateMenuSchema,
+} from "../schema";
 import { BadRequestError } from "../models/error";
 import { cloudinary } from "../config/cloudinary";
 import { prisma } from "../config/prisma";
@@ -11,107 +15,133 @@ class MenuService {
 
   async menus() {
     const menus = await this.prisma.menu.findMany({
-      where: { isActive: true },
+      include: {
+        menuItems: true,
+      },
     });
     return menus;
   }
 
   async createMenu({
     name,
-    picture,
-    cupSize,
-    price,
-  }: z.infer<typeof createMenuSchema> & { picture: Buffer }) {
+    drinkType,
+    categories,
+  }: z.infer<typeof createMenuSchema>) {
     const menu = await this.prisma.menu
       .create({
         data: {
           name,
-          picture: "",
-          price,
-          cupSize,
+          drinkType,
+          categories: categories
+            .split(",")
+            .map((category) => category.trim().toLowerCase())
+            .filter((category) => category !== "")
+            .join(","),
+          menuItems: {
+            create: [
+              {
+                cupSize: "SMALL",
+                price: 0,
+                picture: "",
+                isActive: false,
+              },
+              {
+                cupSize: "MEDIUM",
+                price: 0,
+                picture: "",
+                isActive: false,
+              },
+              {
+                cupSize: "LARGE",
+                price: 0,
+                picture: "",
+                isActive: false,
+              },
+            ],
+          },
         },
+        include: { menuItems: true },
       })
       .catch(() => {
         throw new BadRequestError("The menu is already exist");
       });
 
-    const pictureUrl = await new Promise(
-      (resolve: (value: string) => void, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            {
-              public_id: menu.id,
-              filename_override: menu.id,
-              folder: "menu",
-              format: "jpg",
-            },
-            async (err, result) => {
-              if (err || !result) {
-                return reject(new BadRequestError("Something went wrong."));
-              }
-
-              const { picture } = await this.prisma.menu
-                .update({
-                  where: {
-                    id: menu.id,
-                  },
-                  data: {
-                    picture: result.secure_url,
-                  },
-                })
-                .catch((_) => {
-                  throw new BadRequestError(
-                    "Something is wrong with the file."
-                  );
-                });
-
-              resolve(picture as string);
-            }
-          )
-          .end(picture);
-      }
-    ).catch(async (err) => {
-      await this.prisma.menu.delete({ where: { id: menu.id } });
-      throw err;
-    });
-
-    return {
-      id: menu.id,
-      name: menu.name,
-      picture: pictureUrl,
-      price: menu.price,
-      cupSize: menu.cupSize,
-    };
+    return menu;
   }
 
   async updateMenu({
     id,
     name,
-    picture,
-    price,
-    cupSize,
-  }: z.infer<typeof updateMenuSchema> & { id: string; picture?: string }) {
+    drinkType,
+    categories,
+  }: z.infer<typeof updateMenuSchema> & { id: string }) {
     const updatedMenu = await this.prisma.menu
       .update({
         where: { id },
         data: {
           ...(name === undefined ? {} : { name }),
-          ...(picture === undefined ? {} : { picture }),
-          ...(price === undefined ? {} : { price }),
-          ...(cupSize === undefined ? {} : { cupSize }),
+          ...(drinkType === undefined ? {} : { drinkType }),
+          ...(categories === undefined
+            ? {}
+            : {
+                categories: categories
+                  .split(",")
+                  .map((category) => category.trim().toLowerCase())
+                  .filter((category) => category !== "")
+                  .join(","),
+              }),
         },
+        include: { menuItems: true },
       })
       .catch(() => {
         throw new BadRequestError("The menu detail is already exist");
       });
 
-    return {
-      id: updatedMenu.id,
-      name: updatedMenu.name,
-      picture: updatedMenu.picture,
-      price: updatedMenu.price,
-      cupSize: updatedMenu.cupSize,
-    };
+    return updatedMenu;
+  }
+
+  async updateMenuItem({
+    id,
+    item,
+    picture,
+  }: { item: z.infer<typeof updateMenuItemSchema> } & {
+    id: string;
+    picture?: string;
+  }) {
+    // Check if the id and menu id is valid
+    const menu = await prisma.menu
+      .findUniqueOrThrow({
+        where: {
+          id,
+          menuItems: {
+            some: { id: item.id },
+          },
+        },
+        include: { menuItems: true },
+      })
+      .catch((_) => {
+        console.log(_);
+        throw new BadRequestError("Invalid menu id or menu item id");
+      });
+
+    const updateMenuItem = await this.prisma.menuItem.update({
+      where: { id: item.id },
+      data: {
+        price: item.price,
+        isActive: item.isActive,
+        ...(picture === undefined ? {} : { picture: picture }),
+      },
+    });
+
+    // Add updated menu item to menu
+    menu.menuItems = menu.menuItems.map((menuItem) => {
+      if (menuItem.id === updateMenuItem.id) {
+        return updateMenuItem;
+      }
+      return menuItem;
+    });
+
+    return menu;
   }
 }
 

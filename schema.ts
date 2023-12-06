@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+export const drinkTypeSchema = z.enum(["HOT", "COLD", "FRAPPE"]);
+
 export const loginSchema = z.object({
   data: z
     .string()
@@ -51,14 +53,23 @@ export const updateUserSchema = z.object({
 
 export const createMenuSchema = z.object({
   name: z.string().min(3).max(100),
-  price: z.preprocess((val) => Number(val), z.number().min(0)),
-  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+  drinkType: drinkTypeSchema,
+  categories: z.string().min(0).max(100),
 });
 
 export const updateMenuSchema = z.object({
   name: z.string().min(3).max(100).optional(),
-  price: z.preprocess((val) => Number(val), z.number().min(0)).optional(),
-  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]).optional(),
+  drinkType: drinkTypeSchema.optional(),
+  categories: z.string().min(0).max(100).optional(),
+});
+
+export const updateMenuItemSchema = z.object({
+  id: z.string().uuid(),
+  price: z.preprocess((val) => Number(val), z.number().min(0)),
+  isActive: z.preprocess(
+    (val) => String(val).toLowerCase() === "true",
+    z.boolean()
+  ),
 });
 
 export const orderSchema = z.object({
