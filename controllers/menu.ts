@@ -23,6 +23,7 @@ export async function menus(req: Request, res: Response) {
 
     return {
       ...menu,
+      picture: items.find((m) => m.picture !== "")?.picture ?? "",
       data: items.map((m) => {
         return {
           id: m.id,
