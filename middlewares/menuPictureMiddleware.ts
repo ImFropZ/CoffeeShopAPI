@@ -27,7 +27,7 @@ export async function menuPictureMiddleware(
             },
             (err, result) => {
               if (err || !result) {
-                throw new BadRequestError("Something went wrong.");
+                return next(new BadRequestError("Something went wrong."));
               }
 
               res.locals.picture = result.secure_url;

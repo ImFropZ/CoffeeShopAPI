@@ -5,7 +5,6 @@ import {
   updateMenuSchema,
 } from "../schema";
 import { BadRequestError } from "../models/error";
-import { cloudinary } from "../config/cloudinary";
 import { prisma } from "../config/prisma";
 
 class MenuService {
