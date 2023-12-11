@@ -60,7 +60,9 @@ export async function updateMenu(req: Request, res: Response) {
     id,
   });
 
-  res.json({ data: updatedMenu });
+  res.json({
+    data: { ...updatedMenu, categories: updatedMenu.categories.split(",") },
+  });
 }
 
 export async function updateMenuItem(req: Request, res: Response) {
