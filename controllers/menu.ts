@@ -86,3 +86,15 @@ export async function updateMenuItem(req: Request, res: Response) {
 
   res.json({ data: updatedMenu });
 }
+
+export async function categories(req: Request, res: Response) {
+  const data = await menuService.categories();
+
+  const responseSet = new Set(
+    data
+      .flatMap((entry) => entry.categories.split(","))
+      .map((category) => category.trim())
+  );
+
+  res.json({ data: Array.from(responseSet) });
+}

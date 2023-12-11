@@ -142,6 +142,15 @@ class MenuService {
 
     return menu;
   }
+
+  categories = async () => {
+    const categories = await this.prisma.menu.findMany({
+      select: {
+        categories: true,
+      },
+    });
+    return categories;
+  };
 }
 
 export default new MenuService();
