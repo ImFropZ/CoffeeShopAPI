@@ -12,10 +12,15 @@ class MenuService {
 
   MenuService() {}
 
-  async menus() {
+  async menus({ categories }: { categories?: string }) {
     const menus = await this.prisma.menu.findMany({
       include: {
         menuItems: true,
+      },
+      where: {
+        categories: {
+          contains: categories,
+        },
       },
     });
     return menus;

@@ -8,7 +8,7 @@ export async function queryMiddleware(
   next: NextFunction
 ) {
   const { query } = req;
-  const { start_date, end_date } = query;
+  const { start_date, end_date, ...props } = query;
 
   if (start_date && !end_date) {
     throw new BadRequestError("end_date query is required");
@@ -23,6 +23,10 @@ export async function queryMiddleware(
       start: start_date ? moment(start_date as string) : moment(),
       end: end_date ? moment(end_date as string) : moment(),
     };
+  }
+
+  for (const [key, value] of Object.entries(props)) {
+    res.locals[key] = value;
   }
 
   next();

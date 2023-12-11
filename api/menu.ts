@@ -11,9 +11,10 @@ import {
 import { adminValidatorMiddleware } from "../middlewares/roleValidatorMiddlware";
 import { upload } from "../config/multer";
 import { menuPictureMiddleware } from "../middlewares/menuPictureMiddleware";
+import { queryMiddleware } from "../middlewares/queryMiddleware";
 const api = Router();
 
-api.get("/", use(authorizeMiddleware), use(menus));
+api.get("/", use(authorizeMiddleware), use(queryMiddleware), use(menus));
 api.get("/categories", use(authorizeMiddleware), use(categories));
 
 api.post(

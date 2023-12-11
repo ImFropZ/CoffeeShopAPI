@@ -9,7 +9,7 @@ import { BadRequestError } from "../models/error";
 import { z } from "zod";
 
 export async function menus(req: Request, res: Response) {
-  const menus = await menuService.menus();
+  const menus = await menuService.menus({ categories: res.locals.categories });
 
   const response = menus.map((menu) => {
     return {
