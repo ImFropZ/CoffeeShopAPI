@@ -8,6 +8,7 @@ import {
   updateStockItemSchema,
   updateStockSchema,
 } from "../schema";
+import { Moment } from "moment";
 
 export async function stocks(req: Request, res: Response) {
   const stocks = await stockService.getStocks();
@@ -35,7 +36,11 @@ export async function stockReport(req: Request, res: Response) {
 }
 
 export async function stockReports(req: Request, res: Response) {
-  const reports = await stockService.getStockReports();
+  const dateRange = res.locals.dateRange as
+    | { start: Moment; end: Moment }
+    | undefined;
+
+  const reports = await stockService.getStockReports(dateRange);
   res.json({ data: reports });
 }
 

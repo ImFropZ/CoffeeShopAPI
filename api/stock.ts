@@ -15,11 +15,17 @@ import {
   updateStockItem,
   stockItems,
 } from "../controllers/stock";
+import { queryMiddleware } from "../middlewares/queryMiddleware";
 
 const api = Router();
 
 api.get("/", use(authorizeMiddleware), use(stocks));
-api.get("/reports", use(authorizeMiddleware), use(stockReports));
+api.get(
+  "/reports",
+  use(authorizeMiddleware),
+  use(queryMiddleware),
+  use(stockReports)
+);
 
 api.get("/:id", use(authorizeMiddleware), use(stock));
 api.get("/:id/items", use(authorizeMiddleware), use(stockItems));

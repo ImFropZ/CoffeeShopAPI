@@ -2,6 +2,7 @@ import { stockItemSchema, updateStockItemSchema } from "../schema";
 import * as z from "zod";
 import { BadRequestError } from "../models/error";
 import { prisma } from "../config/prisma";
+import { Moment } from "moment";
 
 class StockService {
   prisma = prisma;
@@ -147,8 +148,22 @@ class StockService {
     });
   }
 
-  async getStockReports() {
+  async getStockReports(dateRange: { start: Moment; end: Moment } | undefined) {
+    if (!dateRange) {
+      return await this.prisma.stockReport.findMany({
+        include: { stockReportItems: { include: { stock: true } } },
+      });
+    }
+
+    const { start, end } = dateRange;
+
     return await this.prisma.stockReport.findMany({
+      where: {
+        createdAt: {
+          lte: end.toISOString(),
+          gte: start.toISOString(),
+        },
+      },
       include: { stockReportItems: { include: { stock: true } } },
     });
   }
