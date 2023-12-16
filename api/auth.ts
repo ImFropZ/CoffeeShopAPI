@@ -23,7 +23,7 @@ api.post("/verify-token", use(verifyToken));
 api.put(
   "/me",
   use(authorizeMiddleware),
-  use(upload),
+  use(upload.single("image")),
   use(profilePictureMiddleware),
   use(updateProfile)
 );

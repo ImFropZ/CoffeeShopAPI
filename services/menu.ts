@@ -12,14 +12,14 @@ class MenuService {
 
   MenuService() {}
 
-  async menus({ categories }: { categories?: string }) {
+  async menus({ category }: { category?: string }) {
     const menus = await this.prisma.menu.findMany({
       include: {
         menuItems: true,
       },
       where: {
         categories: {
-          contains: categories,
+          contains: category,
         },
       },
     });
@@ -106,9 +106,8 @@ class MenuService {
 
   async updateMenuItem({
     id,
-    item,
-    picture,
-  }: { item: z.infer<typeof updateMenuItemSchema> } & {
+    items,
+  }: { items: z.infer<typeof updateMenuItemSchema> } & {
     id: string;
     picture?: string;
   }) {
@@ -118,7 +117,7 @@ class MenuService {
         where: {
           id,
           menuItems: {
-            some: { id: item.id },
+            some: { id: { in: items.map((item) => item.id) } },
           },
         },
         include: { menuItems: true },
@@ -128,24 +127,25 @@ class MenuService {
         throw new BadRequestError("Invalid menu id or menu item id");
       });
 
-    const updateMenuItem = await this.prisma.menuItem.update({
-      where: { id: item.id },
-      data: {
-        price: item.price,
-        isActive: item.isActive,
-        ...(picture === undefined ? {} : { picture: picture }),
-      },
+    const updateMenuItems = items.map(async (item) => {
+      return await this.prisma.menuItem.update({
+        where: { id: item.id },
+        data: {
+          ...(!item.image ? {} : { picture: item.image }),
+          price: item.price,
+          isActive: item.isActive,
+        },
+      });
     });
 
-    // Add updated menu item to menu
-    menu.menuItems = menu.menuItems.map((menuItem) => {
-      if (menuItem.id === updateMenuItem.id) {
-        return updateMenuItem;
-      }
-      return menuItem;
+    await Promise.all(updateMenuItems);
+
+    const updatedMenu = await this.prisma.menu.findUnique({
+      where: { id },
+      include: { menuItems: true },
     });
 
-    return menu;
+    return updatedMenu;
   }
 
   categories = async () => {
