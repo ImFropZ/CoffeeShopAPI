@@ -13,57 +13,39 @@ class OrderService {
   OrderService() {}
 
   async order(order: OrderParams) {
-    const { username, menus, customerId } = order;
+    const { username, menus, discount, customerId } = order;
 
-    const user = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (!user) {
-      throw new BadRequestError("Invalid user data");
-    }
-
-    const menuItems = (
-      await this.prisma.menuItem.findMany({
+    if (customerId) {
+      const customer = await this.prisma.customer.findUnique({
         where: {
-          id: {
-            in: menus.map((menu) => menu.id),
-          },
+          id: customerId,
         },
-      })
-    ).map((item) => {
-      return {
-        menuId: item.id,
-        quantity: menus.find((menu) => menu.id === item.id)?.quantity || 1,
-        sugar: menus.find((menu) => menu.id === item.id)?.sugar || 1,
-        attribute: menus.find((menu) => menu.id === item.id)?.attribute || "",
-        ice: menus.find((menu) => menu.id === item.id)?.ice || 1,
-        price: item.price,
-      };
-    });
+      });
 
-    if (menuItems.length === 0 || menuItems.length !== menus.length) {
-      throw new BadRequestError("Invalid menu data");
+      if (!customer) {
+        throw new BadRequestError("Customer not found");
+      }
     }
 
-    const invoice = await this.prisma.invoice
-      .create({
-        data: {
-          createdAt: new Date(),
-          customer: customerId ? { connect: { id: customerId } } : undefined,
-          user: { connect: { id: user.id } },
-          items: {
-            createMany: {
-              data: menuItems,
-            },
+    const invoice = await this.prisma.invoice.create({
+      data: {
+        discount: discount,
+        ...(customerId && { customer: { connect: { id: customerId } } }),
+        user: { connect: { username: username } },
+        items: {
+          createMany: {
+            data: menus.map((menu) => ({
+              id: menu.id,
+              quantity: menu.quantity,
+              sugar: menu.sugar,
+              ice: menu.ice,
+              attributes: menu.attributes,
+              menuId: menu.id,
+            })),
           },
         },
-      })
-      .catch(() => {
-        throw new BadRequestError(
-          "Unable to order the items at the moment. Please try again later"
-        );
-      });
+      },
+    });
 
     return !!invoice;
   }

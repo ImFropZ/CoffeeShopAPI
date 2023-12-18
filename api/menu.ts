@@ -35,9 +35,9 @@ api.put(
   use(adminValidatorMiddleware),
   use(
     upload.fields([
-      { name: "items[0][image]", maxCount: 1 },
-      { name: "items[1][image]", maxCount: 1 },
-      { name: "items[2][image]", maxCount: 1 },
+      { name: "items[0][picture]", maxCount: 1 },
+      { name: "items[1][picture]", maxCount: 1 },
+      { name: "items[2][picture]", maxCount: 1 },
     ])
   ),
   use(menuPictureMiddleware),
