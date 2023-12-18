@@ -8,34 +8,66 @@ export async function menuPictureMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  if (req.file && req.body.id) {
-    sharp(req.file.buffer)
-      .resize(200, 200)
-      .toFormat("jpeg")
-      .toBuffer((err, buffer) => {
-        if (err) {
-          throw new BadRequestError("Input file is not supported");
-        }
+  if (req.files && req.body.items) {
+    const images = [] as Express.Multer.File[];
 
-        cloudinary.uploader
-          .upload_stream(
-            {
-              public_id: req.body.id,
-              filename_override: req.body.id,
-              folder: "menu",
-              format: "jpg",
-            },
-            (err, result) => {
-              if (err || !result) {
-                return next(new BadRequestError("Something went wrong."));
-              }
+    for (let i = 0; i < 3; i++) {
+      //@ts-ignore
+      const image = req.files[`items[${i}][image]`];
+      if (image) {
+        images.push(image[0]);
+      } else {
+        // Push empty object to keep the index
+        images.push({} as Express.Multer.File);
+      }
+    }
 
-              res.locals.picture = result.secure_url;
-              next();
+    const sharpPromises = images.map((image, index) => {
+      if (Object.keys(image).length === 0) {
+        return Promise.resolve(); // Resolve immediately for empty images
+      }
+
+      return new Promise((resolve, reject) => {
+        sharp(image.buffer)
+          .resize({ width: 500, height: 500 })
+          .jpeg()
+          .toBuffer((err, buffer) => {
+            if (err) {
+              reject(err);
+            } else {
+              // Use cloudinary.uploader here
+              cloudinary.uploader
+                .upload_stream(
+                  {
+                    public_id: req.body.items[index].id,
+                    filename_override: req.body.items[index].id,
+                    folder: "menu",
+                    format: "jpg",
+                  },
+                  async (err, result) => {
+                    if (err || !result) {
+                      reject(new BadRequestError("Something went wrong."));
+                      return;
+                    }
+
+                    req.body.items[index].image = result.secure_url;
+                    resolve(null);
+                    return;
+                  }
+                )
+                .end(buffer);
             }
-          )
-          .end(buffer);
+          });
       });
+    });
+
+    try {
+      // Wait for all promises to resolve
+      await Promise.all(sharpPromises);
+      next();
+    } catch (error) {
+      next(new BadRequestError("Error processing images."));
+    }
   } else {
     next();
   }

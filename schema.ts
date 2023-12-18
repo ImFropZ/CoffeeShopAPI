@@ -63,14 +63,17 @@ export const updateMenuSchema = z.object({
   categories: z.string().min(0).max(100).optional(),
 });
 
-export const updateMenuItemSchema = z.object({
-  id: z.string().uuid(),
-  price: z.preprocess((val) => Number(val), z.number().min(0)),
-  isActive: z.preprocess(
-    (val) => String(val).toLowerCase() === "true",
-    z.boolean()
-  ),
-});
+export const updateMenuItemSchema = z.array(
+  z.object({
+    id: z.string().uuid(),
+    price: z.preprocess((val) => Number(val), z.number().min(0)),
+    image: z.string().optional(),
+    isActive: z.preprocess(
+      (val) => String(val).toLowerCase() === "true",
+      z.boolean()
+    ),
+  })
+);
 
 export const orderSchema = z.object({
   menus: z

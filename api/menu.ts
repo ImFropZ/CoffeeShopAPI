@@ -33,7 +33,13 @@ api.put(
   "/:id/items",
   use(authorizeMiddleware),
   use(adminValidatorMiddleware),
-  use(upload),
+  use(
+    upload.fields([
+      { name: "items[0][image]", maxCount: 1 },
+      { name: "items[1][image]", maxCount: 1 },
+      { name: "items[2][image]", maxCount: 1 },
+    ])
+  ),
   use(menuPictureMiddleware),
   use(updateMenuItem)
 );

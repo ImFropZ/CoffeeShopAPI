@@ -9,7 +9,7 @@ import { BadRequestError } from "../models/error";
 import { z } from "zod";
 
 export async function menus(req: Request, res: Response) {
-  const menus = await menuService.menus({ categories: res.locals.categories });
+  const menus = await menuService.menus({ category: res.locals.category });
 
   const response = menus.map((menu) => {
     return {
@@ -74,14 +74,15 @@ export async function updateMenuItem(req: Request, res: Response) {
       throw new BadRequestError("Invalid menu id");
     });
 
-  const item = await updateMenuItemSchema.parseAsync(req.body).catch((_) => {
-    throw new BadRequestError("Invalid menu item data");
-  });
+  const items = await updateMenuItemSchema
+    .parseAsync(req.body.items)
+    .catch((_) => {
+      throw new BadRequestError("Invalid menu item data");
+    });
 
   const updatedMenu = await menuService.updateMenuItem({
     id,
-    item,
-    picture: res.locals.picture,
+    items,
   });
 
   res.json({ data: updatedMenu });
