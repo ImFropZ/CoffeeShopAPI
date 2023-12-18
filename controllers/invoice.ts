@@ -14,6 +14,8 @@ export async function invoices(req: Request, res: Response) {
   const response = invoices.map((invoice) => {
     return {
       id: invoice.id,
+      discount: invoice.discount,
+      total: invoice.total,
       cashier: {
         ...invoice.user,
         hashedPassword: undefined,
@@ -24,9 +26,18 @@ export async function invoices(req: Request, res: Response) {
       },
       customer: invoice.customer,
       createdAt: invoice.createdAt,
-      items: invoice.items,
-    }
-  })
+      items: invoice.items.map((item) => {
+        return {
+          id: item.id,
+          price: item.price,
+          quantity: item.quantity,
+          sugar: item.sugar,
+          ice: item.ice,
+          attributes: item.attributes,
+        };
+      }),
+    };
+  });
 
   res.json({ data: response });
 }

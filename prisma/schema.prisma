@@ -46,7 +46,7 @@ model StockItem {
   id               String            @id @default(uuid())
   expiresDate      DateTime
   quantity         Int
-  price            Decimal
+  price            Decimal           @db.Decimal(8, 2)
   stock            Stock             @relation(fields: [stockId], references: [id])
   stockId          String
   stockReportItems StockReportItem[]
@@ -81,7 +81,7 @@ model Menu {
 
 model MenuItem {
   id           String        @id @default(uuid())
-  price        Decimal
+  price        Decimal       @db.Decimal(8, 2)
   cupSize      CupSize
   picture      String
   menuId       String
@@ -94,8 +94,8 @@ model MenuItem {
 
 model Invoice {
   id         String        @id @default(uuid())
-  discount   Decimal       @default(0)
-  total      Decimal       @default(0)
+  discount   Decimal       @default(0) @db.Decimal(2, 2)
+  total      Decimal       @default(0) @db.Decimal(8, 2)
   createdAt  DateTime      @default(now())
   customerId String?
   customer   Customer?     @relation(fields: [customerId], references: [id])
@@ -109,7 +109,7 @@ model InvoiceItem {
   quantity   Int
   sugar      Float
   ice        Float
-  price      Decimal  @default(0)
+  price      Decimal  @default(0) @db.Decimal(8, 2)
   attributes String
   menuId     String
   menuItem   MenuItem @relation(fields: [menuId], references: [id])

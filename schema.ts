@@ -80,15 +80,15 @@ export const orderSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        quantity: z.number().min(1),
-        sugar: z.number(),
-        ice: z.number(),
+        quantity: z.preprocess((val) => Number(val), z.number().min(1)),
+        sugar: z.preprocess((val) => Number(val), z.number()),
+        ice: z.preprocess((val) => Number(val), z.number()),
         attributes: z.string(),
       })
     )
     .min(1),
-  discount: z.number().min(0).max(1),
-  customerId: z.string().optional(),
+  discount: z.preprocess((val) => Number(val), z.number().min(0).max(1)),
+  customerId: z.optional(z.string()),
 });
 
 export const createCustomerSchema = z.object({

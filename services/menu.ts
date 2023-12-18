@@ -150,6 +150,13 @@ class MenuService {
 
   categories = async () => {
     const categories = await this.prisma.menu.findMany({
+      where: {
+        menuItems: {
+          some: {
+            isActive: true,
+          }
+        }
+      },
       select: {
         categories: true,
       },
