@@ -13,7 +13,7 @@ export async function menuPictureMiddleware(
 
     for (let i = 0; i < 3; i++) {
       //@ts-ignore
-      const image = req.files[`items[${i}][image]`];
+      const image = req.files[`items[${i}][picture]`];
       if (image) {
         images.push(image[0]);
       } else {
@@ -29,7 +29,7 @@ export async function menuPictureMiddleware(
 
       return new Promise((resolve, reject) => {
         sharp(image.buffer)
-          .resize({ width: 500, height: 500 })
+          .resize({ width: 200, height: 200 })
           .jpeg()
           .toBuffer((err, buffer) => {
             if (err) {

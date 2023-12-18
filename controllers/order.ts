@@ -16,7 +16,7 @@ export async function order(req: Request, res: Response) {
 
   const isSuccess = await orderService.order({ ...order, username: username });
 
-  if (!true) {
+  if (!isSuccess) {
     throw new BadRequestError(
       "Unable to order the items at the moment. Please try again later"
     );

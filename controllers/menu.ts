@@ -17,15 +17,20 @@ export async function menus(req: Request, res: Response) {
       name: menu.name,
       drinkType: menu.drinkType,
       categories: menu.categories.split(",").map((category) => category.trim()),
-      menuItems: menu.menuItems.map((menuItem) => {
-        return {
-          id: menuItem.id,
-          cupSize: menuItem.cupSize,
-          price: menuItem.price,
-          picture: menuItem.picture,
-          isActive: menuItem.isActive,
-        };
-      }),
+      menuItems: menu.menuItems
+        .sort((a, b) => {
+          const sizes = ["SMALL", "MEDIUM", "LARGE"];
+          return sizes.indexOf(a.cupSize) - sizes.indexOf(b.cupSize);
+        })
+        .map((menuItem) => {
+          return {
+            id: menuItem.id,
+            cupSize: menuItem.cupSize,
+            price: menuItem.price,
+            picture: menuItem.picture,
+            isActive: menuItem.isActive,
+          };
+        }),
     };
   });
 
@@ -44,6 +49,10 @@ export async function createMenu(req: Request, res: Response) {
     categories: createdMenu.categories
       .split(",")
       .map((category) => category.trim()),
+    menuItems: createdMenu.menuItems.sort((a, b) => {
+      const sizes = ["SMALL", "MEDIUM", "LARGE"];
+      return sizes.indexOf(a.cupSize) - sizes.indexOf(b.cupSize);
+    }),
   };
 
   res.json({ data: response });
@@ -73,6 +82,8 @@ export async function updateMenuItem(req: Request, res: Response) {
     .catch((_) => {
       throw new BadRequestError("Invalid menu id");
     });
+
+  console.log(req.body.items);
 
   const items = await updateMenuItemSchema
     .parseAsync(req.body.items)

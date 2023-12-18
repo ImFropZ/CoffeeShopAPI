@@ -83,10 +83,11 @@ export const orderSchema = z.object({
         quantity: z.number().min(1),
         sugar: z.number(),
         ice: z.number(),
-        attribute: z.string(),
+        attributes: z.string(),
       })
     )
     .min(1),
+  discount: z.number().min(0).max(1),
   customerId: z.string().optional(),
 });
 

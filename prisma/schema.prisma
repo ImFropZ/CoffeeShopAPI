@@ -22,7 +22,7 @@ model User {
 
 model Customer {
   id       String    @id @default(uuid())
-  name     String
+  name     String    @unique
   phone    String?
   address  String?
   invoices Invoice[]
@@ -94,6 +94,8 @@ model MenuItem {
 
 model Invoice {
   id         String        @id @default(uuid())
+  discount   Decimal       @default(0)
+  total      Decimal       @default(0)
   createdAt  DateTime      @default(now())
   customerId String?
   customer   Customer?     @relation(fields: [customerId], references: [id])
@@ -103,16 +105,16 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id        String   @id @default(uuid())
-  quantity  Int
-  sugar     Float
-  ice       Float
-  price     Decimal  @default(0)
-  attribute String
-  menuId    String
-  menuItem  MenuItem @relation(fields: [menuId], references: [id])
-  invoiceId String
-  invoice   Invoice  @relation(fields: [invoiceId], references: [id])
+  id         String   @id @default(uuid())
+  quantity   Int
+  sugar      Float
+  ice        Float
+  price      Decimal  @default(0)
+  attributes String
+  menuId     String
+  menuItem   MenuItem @relation(fields: [menuId], references: [id])
+  invoiceId  String
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
 }
 
 enum CupSize {
