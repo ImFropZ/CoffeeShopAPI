@@ -13,6 +13,7 @@ model User {
   email          String?        @unique
   username       String         @unique
   hashedPassword String
+  picture        String?
   role           Role           @default(USER)
   roleId         Role           @default(USER)
   invoices       Invoice[]
@@ -21,7 +22,7 @@ model User {
 
 model Customer {
   id       String    @id @default(uuid())
-  name     String
+  name     String    @unique
   phone    String?
   address  String?
   invoices Invoice[]
@@ -45,7 +46,7 @@ model StockItem {
   id               String            @id @default(uuid())
   expiresDate      DateTime
   quantity         Int
-  price            Decimal
+  price            Decimal           @db.Decimal(8, 2)
   stock            Stock             @relation(fields: [stockId], references: [id])
   stockId          String
   stockReportItems StockReportItem[]
@@ -69,38 +70,51 @@ model StockReportItem {
 }
 
 model Menu {
+  id         String     @id @default(uuid())
+  name       String
+  drinkType  DrinkType
+  menuItems  MenuItem[]
+  categories String
+
+  @@unique([name, drinkType])
+}
+
+model MenuItem {
   id           String        @id @default(uuid())
-  name         String
-  price        Decimal
+  price        Decimal       @db.Decimal(8, 2)
   cupSize      CupSize
   picture      String
+  menuId       String
+  menu         Menu          @relation(fields: [menuId], references: [id])
   isActive     Boolean       @default(true)
   invoiceItems InvoiceItem[]
 
-  @@unique([name, cupSize])
+  @@unique([menuId, cupSize])
 }
 
 model Invoice {
   id         String        @id @default(uuid())
+  discount   Decimal       @default(0) @db.Decimal(2, 2)
+  total      Decimal       @default(0) @db.Decimal(8, 2)
   createdAt  DateTime      @default(now())
-  customer   Customer?     @relation(fields: [customerId], references: [id])
   customerId String?
-  user       User          @relation(fields: [userId], references: [id])
+  customer   Customer?     @relation(fields: [customerId], references: [id])
   userId     String
+  user       User          @relation(fields: [userId], references: [id])
   items      InvoiceItem[]
 }
 
 model InvoiceItem {
-  id        String   @id @default(uuid())
-  quantity  Int
-  sugar     Float
-  ice       Float
-  price     Decimal  @default(0)
-  attribute String
-  menu      Menu     @relation(fields: [menuId], references: [id])
-  menuId    String
-  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
-  invoiceId String?
+  id         String   @id @default(uuid())
+  quantity   Int
+  sugar      Float
+  ice        Float
+  price      Decimal  @default(0) @db.Decimal(8, 2)
+  attributes String
+  menuId     String
+  menuItem   MenuItem @relation(fields: [menuId], references: [id])
+  invoiceId  String
+  invoice    Invoice  @relation(fields: [invoiceId], references: [id])
 }
 
 enum CupSize {
@@ -116,4 +130,10 @@ model PasswordReset {
   expiresAt DateTime
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @unique
+}
+
+enum DrinkType {
+  HOT
+  COLD
+  FRAPPE
 }

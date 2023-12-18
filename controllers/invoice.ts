@@ -10,7 +10,36 @@ export async function invoices(req: Request, res: Response) {
     | undefined;
 
   const invoices = await invoiceService.getInvoices(dateRange);
-  res.json({ data: invoices });
+
+  const response = invoices.map((invoice) => {
+    return {
+      id: invoice.id,
+      discount: invoice.discount,
+      total: invoice.total,
+      cashier: {
+        ...invoice.user,
+        hashedPassword: undefined,
+        role: undefined,
+        username: undefined,
+        picture: undefined,
+        roleId: undefined,
+      },
+      customer: invoice.customer,
+      createdAt: invoice.createdAt,
+      items: invoice.items.map((item) => {
+        return {
+          id: item.id,
+          price: item.price,
+          quantity: item.quantity,
+          sugar: item.sugar,
+          ice: item.ice,
+          attributes: item.attributes,
+        };
+      }),
+    };
+  });
+
+  res.json({ data: response });
 }
 
 export async function deleteInvoice(req: Request, res: Response) {

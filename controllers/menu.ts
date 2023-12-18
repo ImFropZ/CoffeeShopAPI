@@ -1,40 +1,40 @@
 import { Request, Response } from "express";
 import menuService from "../services/menu";
-import { createMenuSchema, updateMenuSchema } from "../schema";
+import {
+  createMenuSchema,
+  updateMenuItemSchema,
+  updateMenuSchema,
+} from "../schema";
 import { BadRequestError } from "../models/error";
+import { z } from "zod";
 
 export async function menus(req: Request, res: Response) {
-  const menus = await menuService.menus();
+  const menus = await menuService.menus({ category: res.locals.category });
 
-  // Filter array of object and get the name of the menu only unique
-  const menuNames = menus
-    .filter((menu, index, self) => {
-      return index === self.findIndex((m) => m.name === menu.name);
-    })
-    .map((menu) => {
-      return {
-        name: menu.name,
-        picture: menu.picture,
-      };
-    });
-
-  const menuResponse = menuNames.map((menu) => {
-    const items = menus.filter((m) => m.name === menu.name);
-
+  const response = menus.map((menu) => {
     return {
-      ...menu,
-      data: items.map((m) => {
-        return {
-          id: m.id,
-          picture: m.picture,
-          price: m.price,
-          cupSize: m.cupSize,
-        };
-      }),
+      id: menu.id,
+      name: menu.name,
+      drinkType: menu.drinkType,
+      categories: menu.categories.split(",").map((category) => category.trim()),
+      menuItems: menu.menuItems
+        .sort((a, b) => {
+          const sizes = ["SMALL", "MEDIUM", "LARGE"];
+          return sizes.indexOf(a.cupSize) - sizes.indexOf(b.cupSize);
+        })
+        .map((menuItem) => {
+          return {
+            id: menuItem.id,
+            cupSize: menuItem.cupSize,
+            price: menuItem.price,
+            picture: menuItem.picture,
+            isActive: menuItem.isActive,
+          };
+        }),
     };
   });
 
-  res.json({ data: menuResponse });
+  res.json({ data: response });
 }
 
 export async function createMenu(req: Request, res: Response) {
@@ -43,18 +43,70 @@ export async function createMenu(req: Request, res: Response) {
   });
 
   const createdMenu = await menuService.createMenu(menu);
-  res.json({ data: createdMenu });
+
+  const response = {
+    ...createdMenu,
+    categories: createdMenu.categories
+      .split(",")
+      .map((category) => category.trim()),
+    menuItems: createdMenu.menuItems.sort((a, b) => {
+      const sizes = ["SMALL", "MEDIUM", "LARGE"];
+      return sizes.indexOf(a.cupSize) - sizes.indexOf(b.cupSize);
+    }),
+  };
+
+  res.json({ data: response });
 }
 
 export async function updateMenu(req: Request, res: Response) {
   const { id } = req.params;
-  const menu = await updateMenuSchema
-    .parseAsync({ id, ...req.body })
+  const menu = await updateMenuSchema.parseAsync(req.body).catch((_) => {
+    throw new BadRequestError("Invalid menu data");
+  });
+
+  const updatedMenu = await menuService.updateMenu({
+    ...menu,
+    id,
+  });
+
+  res.json({
+    data: { ...updatedMenu, categories: updatedMenu.categories.split(",") },
+  });
+}
+
+export async function updateMenuItem(req: Request, res: Response) {
+  const id = await z
+    .string()
+    .uuid()
+    .parseAsync(req.params.id)
     .catch((_) => {
-      throw new BadRequestError("Invalid menu data");
+      throw new BadRequestError("Invalid menu id");
     });
 
-  const updatedMenu = await menuService.updateMenu(menu);
+  console.log(req.body.items);
+
+  const items = await updateMenuItemSchema
+    .parseAsync(req.body.items)
+    .catch((_) => {
+      throw new BadRequestError("Invalid menu item data");
+    });
+
+  const updatedMenu = await menuService.updateMenuItem({
+    id,
+    items,
+  });
 
   res.json({ data: updatedMenu });
+}
+
+export async function categories(req: Request, res: Response) {
+  const data = await menuService.categories();
+
+  const responseSet = new Set(
+    data
+      .flatMap((entry) => entry.categories.split(","))
+      .map((category) => category.trim())
+  );
+
+  res.json({ data: Array.from(responseSet) });
 }

@@ -266,6 +266,9 @@ class AuthService {
       email: user.email,
       role: user.role,
       invoices: user.invoices,
+      picture: {
+        url: user.picture,
+      },
     };
   }
 
@@ -328,9 +331,13 @@ class AuthService {
       }
 
       return {
+        fullName: updatedUser.fullName,
         username: updatedUser.username,
         email: updatedUser.email,
         role: updatedUser.role,
+        picture: {
+          url: updatedUser.picture ?? "",
+        },
       };
     }
 
@@ -346,9 +353,13 @@ class AuthService {
     });
 
     return {
+      fullName: updatedUser.fullName,
       username: updatedUser.username,
       email: updatedUser.email,
       role: user.role,
+      picture: {
+        url: updatedUser.picture ?? "",
+      },
     };
   }
 }

@@ -1,69 +1,71 @@
-import { PrismaClient } from "@prisma/client";
 import * as z from "zod";
 import { orderSchema } from "../schema";
 import { BadRequestError } from "../models/error";
+import { prisma } from "../config/prisma";
 
 type OrderParams = {
   username: string;
 } & z.infer<typeof orderSchema>;
 
 class OrderService {
-  prisma = new PrismaClient();
+  prisma = prisma;
 
   OrderService() {}
 
   async order(order: OrderParams) {
-    const { username, menus, customerId } = order;
+    const { username, menus, discount, customerId } = order;
 
-    const user = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (!user) {
-      throw new BadRequestError("Invalid user data");
-    }
-
-    const menuItems = (
-      await this.prisma.menu.findMany({
+    if (customerId) {
+      const customer = await this.prisma.customer.findUnique({
         where: {
-          id: {
-            in: menus.map((menu) => menu.id),
-          },
+          id: customerId,
         },
-      })
-    ).map((item: { id: string; price: any }) => {
-      return {
-        menuId: item.id,
-        quantity: menus.find((menu) => menu.id === item.id)?.quantity || 1,
-        sugar: menus.find((menu) => menu.id === item.id)?.sugar || 1,
-        attribute: menus.find((menu) => menu.id === item.id)?.attribute || "",
-        ice: menus.find((menu) => menu.id === item.id)?.ice || 1,
-        price: item.price,
-      };
-    });
+      });
 
-    if (menuItems.length === 0 && menuItems.length !== menus.length) {
-      throw new BadRequestError("Invalid menu data");
+      if (!customer) {
+        throw new BadRequestError("Customer not found");
+      }
     }
 
-    const invoice = await this.prisma.invoice
-      .create({
-        data: {
-          createdAt: new Date(),
-          customer: customerId ? { connect: { id: customerId } } : undefined,
-          user: { connect: { id: user.id } },
-          items: {
-            createMany: {
-              data: menuItems,
-            },
+    const menuItems = await this.prisma.menuItem.findMany({
+      where: {
+        id: {
+          in: menus.map((menu) => menu.id),
+        },
+      },
+    });
+
+    let total = 0.0;
+    menuItems.forEach((item) => {
+      const foundMenu = menus.find((m) => m.id === item.id);
+      if (foundMenu) {
+        // @ts-ignore
+        foundMenu.price = item.price;
+        total += foundMenu.quantity * Number(item.price);
+      }
+    });
+
+    const invoice = await this.prisma.invoice.create({
+      data: {
+        discount: discount,
+        ...(customerId && { customer: { connect: { id: customerId } } }),
+        user: { connect: { username: username } },
+        total,
+        items: {
+          createMany: {
+            data: menus.map((menu) => ({
+              quantity: menu.quantity,
+              sugar: menu.sugar,
+              // @ts-ignore
+              price: menu.price,
+              ice: menu.ice,
+              attributes: menu.attributes,
+              menuId: menu.id,
+            })),
           },
         },
-      })
-      .catch(() => {
-        throw new BadRequestError(
-          "Unable to order the items at the moment. Please try again later"
-        );
-      });
+      },
+    });
 
     return !!invoice;
   }

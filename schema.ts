@@ -1,5 +1,7 @@
 import * as z from "zod";
 
+export const drinkTypeSchema = z.enum(["HOT", "COLD", "FRAPPE"]);
+
 export const loginSchema = z.object({
   data: z
     .string()
@@ -51,35 +53,45 @@ export const updateUserSchema = z.object({
 
 export const createMenuSchema = z.object({
   name: z.string().min(3).max(100),
-  picture: z.string().url(),
-  price: z.number().min(0),
-  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+  drinkType: drinkTypeSchema,
+  categories: z.string().min(0).max(100),
 });
 
 export const updateMenuSchema = z.object({
-  id: z.string(),
-  name: z.string().min(3).max(100),
-  picture: z.string().url(),
-  price: z.number().min(0),
-  cupSize: z.enum(["SMALL", "MEDIUM", "LARGE"]),
+  name: z.string().min(3).max(100).optional(),
+  drinkType: drinkTypeSchema.optional(),
+  categories: z.string().min(0).max(100).optional(),
 });
+
+export const updateMenuItemSchema = z.array(
+  z.object({
+    id: z.string().uuid(),
+    price: z.preprocess((val) => Number(val), z.number().min(0)),
+    image: z.string().optional(),
+    isActive: z.preprocess(
+      (val) => String(val).toLowerCase() === "true",
+      z.boolean()
+    ),
+  })
+);
 
 export const orderSchema = z.object({
   menus: z
     .array(
       z.object({
         id: z.string(),
-        quantity: z.number().min(1),
-        sugar: z.number(),
-        ice: z.number(),
-        attribute: z.string(),
+        quantity: z.preprocess((val) => Number(val), z.number().min(1)),
+        sugar: z.preprocess((val) => Number(val), z.number()),
+        ice: z.preprocess((val) => Number(val), z.number()),
+        attributes: z.string(),
       })
     )
     .min(1),
-  customerId: z.string().optional(),
+  discount: z.preprocess((val) => Number(val), z.number().min(0).max(1)),
+  customerId: z.optional(z.string()),
 });
 
-export const createCustomerSchema = z.object({  
+export const createCustomerSchema = z.object({
   name: z.string().min(3).max(100),
   phone: z.string().min(3).max(20).optional(),
   address: z.string().min(3).max(100).optional(),
