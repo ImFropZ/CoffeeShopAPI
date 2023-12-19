@@ -92,11 +92,16 @@ class AuthService {
     // Check if data is email or username
     const username = data.includes("@") ? undefined : data;
 
-    let user = null;
+    let fullName = "";
+    let email = "";
 
     if (username) {
-      user = await this.prisma.user
+      const user = await this.prisma.user
         .findUnique({
+          select: {
+            email: true,
+            fullName: true,
+          },
           where: {
             username,
           },
@@ -105,9 +110,20 @@ class AuthService {
           console.log(error);
           throw new InternalError("Something went wrong");
         });
+
+      if (!user) {
+        throw new BadRequestError("User is not found");
+      }
+
+      fullName = user?.fullName ?? "";
+      email = user?.email ?? "";
     } else {
-      user = await this.prisma.user
+      const user = await this.prisma.user
         .findUnique({
+          select: {
+            username: true,
+            fullName: true,
+          },
           where: {
             email: data,
           },
@@ -116,36 +132,44 @@ class AuthService {
           console.log(error);
           throw new InternalError("Something went wrong");
         });
+
+      if (!user) {
+        throw new BadRequestError("User is not found");
+      }
+
+      email = data;
+      fullName = user?.fullName ?? "";
     }
 
-    if (!user) {
-      throw new BadRequestError("User is not found");
-    }
-
-    if (!user.email) {
+    if (email === "") {
       throw new BadRequestError("Email is not found");
     }
 
     const token = generateToken();
 
-    transporter.sendMail(
-      {
-        from: process.env.FROM_EMAIL,
-        to: user.email,
-        subject: "Coffee Shop - Forgot password",
-        text: `
-        Hi ${user.username},
-        You have requested to reset your password.
-        Your token is ${token}. This token will expire in 1 hour.
-        
-        If you did not request this, please ignore this email and your password will remain unchanged`,
-      },
-      (err, info) => {
-        if (err) {
-          throw new BadRequestError("Email is not sent");
+    await new Promise((resolve, reject) => {
+      transporter.sendMail(
+        {
+          from: "no-reply@coffee-shop.com",
+          to: email,
+          subject: "Coffee Shop - Forgot password",
+          text: `
+            Hi ${fullName},
+            You have requested to reset your password.
+            Your token is ${token}. This token will expire in 1 hour.
+            
+            If you did not request this, please ignore this email and your password will remain unchanged`,
+        },
+        (err, info) => {
+          if (err) {
+            console.log(err);
+            reject(new BadRequestError("Email is not sent"));
+          } else {
+            resolve(info);
+          }
         }
-      }
-    );
+      );
+    });
 
     const passwordReset = await this.prisma.passwordReset.findFirst({
       where: {
