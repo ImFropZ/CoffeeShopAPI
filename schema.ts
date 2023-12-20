@@ -2,6 +2,8 @@ import * as z from "zod";
 
 export const drinkTypeSchema = z.enum(["HOT", "COLD", "FRAPPE"]);
 
+export const roleSchema = z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]);
+
 export const loginSchema = z.object({
   data: z
     .string()
@@ -36,7 +38,7 @@ export const verifyTokenSchema = z.object({
 export const userLocalsSchema = z.object({
   username: z.string().regex(/^[a-zA-Z0-9_]+$/),
   email: z.string().email().nullable(),
-  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]),
+  role: roleSchema,
 });
 
 export const updateUserSchema = z.object({
@@ -46,7 +48,7 @@ export const updateUserSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/)
     .optional(),
   email: z.string().email().optional(),
-  role: z.enum(["USER", "ADMIN", "STOCK", "CASHIER"]).optional(),
+  role: roleSchema.optional(),
   oldPassword: z.string().min(6).max(100).optional(),
   newPassword: z.string().min(6).max(100).optional(),
 });

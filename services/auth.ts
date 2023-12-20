@@ -343,6 +343,9 @@ class AuthService {
             ...(username ? { username } : {}),
             ...(email ? { email } : {}),
             ...(role ? { role } : {}),
+            ...(userToUpdate.newPassword
+              ? { password: await bcrypt.hash(userToUpdate.newPassword, 10) }
+              : {}),
           },
         })
         .catch((error: Error) => {
