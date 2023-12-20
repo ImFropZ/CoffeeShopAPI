@@ -29,6 +29,8 @@ export async function invoices(req: Request, res: Response) {
       items: invoice.items.map((item) => {
         return {
           id: item.id,
+          name: item.menuItem.menu.name,
+          cupSize: item.menuItem.cupSize,
           price: item.price,
           quantity: item.quantity,
           sugar: item.sugar,
