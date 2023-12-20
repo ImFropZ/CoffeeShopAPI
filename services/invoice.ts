@@ -53,13 +53,18 @@ class InvoiceService {
   }
 
   async deleteInvoice(id: string) {
-    return await this.prisma.invoice
-      .delete({
-        where: { id },
-      })
-      .catch(() => {
-        throw new BadRequestError("Invoice not found");
+    try {
+      await this.prisma.invoiceItem.deleteMany({
+        where: {
+          invoiceId: id,
+        },
       });
+      return await this.prisma.invoice.delete({
+        where: { id },
+      });
+    } catch (_) {
+      throw new BadRequestError("Invoice not found");
+    }
   }
 }
 
