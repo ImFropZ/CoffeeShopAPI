@@ -15,7 +15,6 @@ model User {
   hashedPassword String
   picture        String?
   role           Role           @default(USER)
-  roleId         Role           @default(USER)
   invoices       Invoice[]
   passwordReset  PasswordReset?
 }

@@ -1,4 +1,4 @@
-import { updateUserSchema, userLocalsSchema } from "./../schema";
+import { updateProfileSchema, userLocalsSchema } from "./../schema";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { generateAccessToken, generateToken } from "../utils";
@@ -298,7 +298,7 @@ class AuthService {
 
   async updateProfile(
     user: z.infer<typeof userLocalsSchema>,
-    userToUpdate: z.infer<typeof updateUserSchema>
+    userToUpdate: z.infer<typeof updateProfileSchema>
   ) {
     // Update the password if oldPassword and newPassword is provided
     if (userToUpdate.oldPassword && userToUpdate.newPassword) {
@@ -330,43 +330,7 @@ class AuthService {
       });
     }
 
-    const { email, fullName, role, username } = userToUpdate;
-
-    if (user.role === "ADMIN") {
-      const updatedUser = await this.prisma.user
-        .update({
-          where: {
-            username: user.username,
-          },
-          data: {
-            ...(fullName ? { fullName } : {}),
-            ...(username ? { username } : {}),
-            ...(email ? { email } : {}),
-            ...(role ? { role } : {}),
-            ...(userToUpdate.newPassword
-              ? { password: await bcrypt.hash(userToUpdate.newPassword, 10) }
-              : {}),
-          },
-        })
-        .catch((error: Error) => {
-          console.log(error);
-          throw new InternalError("Something went wrong");
-        });
-
-      if (!updatedUser) {
-        throw new BadRequestError("User is not updated");
-      }
-
-      return {
-        fullName: updatedUser.fullName,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        picture: {
-          url: updatedUser.picture ?? "",
-        },
-      };
-    }
+    const { email, fullName, username } = userToUpdate;
 
     const updatedUser = await this.prisma.user.update({
       where: {

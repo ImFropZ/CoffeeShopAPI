@@ -1,4 +1,4 @@
-import { updateUserSchema, userLocalsSchema } from "./../schema";
+import { updateProfileSchema, userLocalsSchema } from "./../schema";
 import { Response, Request } from "express";
 import authService from "../services/auth";
 import {
@@ -83,7 +83,7 @@ export async function updateProfile(req: Request, res: Response) {
     throw new BadRequestError("Invalid user");
   });
 
-  const userUpdate = await updateUserSchema.parseAsync(req.body).catch((_) => {
+  const userUpdate = await updateProfileSchema.parseAsync(req.body).catch((_) => {
     throw new BadRequestError("Invalid user update");
   });
 

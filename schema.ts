@@ -41,7 +41,7 @@ export const userLocalsSchema = z.object({
   role: roleSchema,
 });
 
-export const updateUserSchema = z.object({
+export const updateProfileSchema = z.object({
   fullName: z.string().optional(),
   username: z
     .string()
@@ -125,3 +125,11 @@ export const updateStockItemSchema = z.array(
     quantity: z.number().int().min(0),
   })
 );
+
+export const updateUserSchema = z.object({
+  fullName: z.string().min(3).max(100).optional(),
+  username: z.string().min(3).max(100).optional(),
+  email: z.string().email().optional(),
+  role: roleSchema.optional(),
+  password: z.string().min(6).max(100).optional(),
+});

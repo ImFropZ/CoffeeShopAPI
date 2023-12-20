@@ -1,11 +1,7 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../config/prisma";
-
-type UpdateUser = {
-  fullName?: string;
-  username?: string;
-  password?: string;
-};
+import { updateUserSchema } from "../schema";
+import { z } from "zod";
 
 class UserService {
   prisma = prisma;
@@ -16,10 +12,10 @@ class UserService {
     return await this.prisma.user.findMany();
   }
 
-  async updateUser(id: string, user: UpdateUser) {
+  async updateUser(username: string, user: z.infer<typeof updateUserSchema>) {
     return await this.prisma.user.update({
       where: {
-        id,
+        username,
       },
       data: {
         ...(user.fullName ? { fullName: user.fullName } : {}),
@@ -27,6 +23,8 @@ class UserService {
         ...(user.password
           ? { password: await bcrypt.hash(user.password, 10) }
           : {}),
+        ...(user.email ? { email: user.email } : {}),
+        ...(user.role ? { role: user.role } : {}),
       },
     });
   }
