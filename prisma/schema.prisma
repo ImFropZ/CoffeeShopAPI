@@ -94,6 +94,7 @@ model MenuItem {
 model Invoice {
   id         String        @id @default(uuid())
   discount   Decimal       @default(0) @db.Decimal(2, 2)
+  subTotal   Decimal       @default(0) @db.Decimal(2, 2)
   total      Decimal       @default(0) @db.Decimal(8, 2)
   createdAt  DateTime      @default(now())
   customerId String?

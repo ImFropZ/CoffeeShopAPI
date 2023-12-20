@@ -15,6 +15,7 @@ export async function invoices(req: Request, res: Response) {
     return {
       id: invoice.id,
       discount: invoice.discount,
+      subTotal: invoice.subTotal,
       total: invoice.total,
       cashier: {
         ...invoice.user,

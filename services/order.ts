@@ -35,13 +35,13 @@ class OrderService {
       },
     });
 
-    let total = 0.0;
+    let subTotal = 0.0;
     menuItems.forEach((item) => {
       const foundMenu = menus.find((m) => m.id === item.id);
       if (foundMenu) {
         // @ts-ignore
         foundMenu.price = item.price;
-        total += foundMenu.quantity * Number(item.price);
+        subTotal += foundMenu.quantity * Number(item.price);
       }
     });
 
@@ -50,7 +50,8 @@ class OrderService {
         discount: discount,
         ...(customerId && { customer: { connect: { id: customerId } } }),
         user: { connect: { username: username } },
-        total,
+        subTotal,
+        total: subTotal * (1 - discount),
         items: {
           createMany: {
             data: menus.map((menu) => ({
