@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Invoice" ALTER COLUMN "subTotal" SET DATA TYPE DECIMAL(8,2);
